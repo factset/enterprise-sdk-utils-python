@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy to package index
+    runs-on: ubuntu-20.04
+    env:
+      REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Configure Poetry
+        run: |
+          poetry config repositories.publish $REPOSITORY_URL
+          poetry config http-basic.publish $REPOSITORY_USERNAME $REPOSITORY_PASSWORD
+
+      - name: Build
+        run: |
+          poetry build
+
+      - name: Publish
+        run: |
+          poetry publish -r publish
