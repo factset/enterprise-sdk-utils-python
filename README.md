@@ -11,13 +11,13 @@ This repository contains a collection of utilities that supports FactSet's SDK i
 
 ### Poetry
 
-```python
+```shell
 poetry add fds.sdk.utils
 ```
 
 ### pip
 
-```python
+```shell
 pip install fds.sdk.utils
 ```
 
@@ -82,7 +82,7 @@ Classes in the authentication module require OAuth 2.0 client configuration info
         "q": "Second Prime Factor",
         "dp": "First Factor CRT Exponent",
         "dq": "Second Factor CRT Exponent",
-        "qi": "First CRT Coefficient",
+        "qi": "First CRT Coefficient"
     }
 }
 ```
