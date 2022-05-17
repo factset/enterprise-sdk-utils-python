@@ -29,7 +29,7 @@ This library contains multiple modules, sample usage of each module is below.
 
 First, you need to create the OAuth 2.0 client configuration that will be used to authenticate against FactSet's APIs:
 
-1. Create a [new application](https://developer.factset.com/applications) on FactSet's Developer Portal.
+1. [Create a new application](https://developer.factset.com/learn/authentication-oauth2#creating-an-application) on FactSet's Developer Portal.
 2. When prompted, download the configuration file and move it to your development environment.
 
 ```python
@@ -52,7 +52,7 @@ Information about the various utility modules contained in this library can be f
 
 ### Authentication
 
-The [authentication module](src/fds/sdk/utils/authentication) provides helper classes that facilitate [OAuth 2.0](https://github.com/factset/oauth2-guidelines) authentication and authorization with FactSet's APIs. Currently the module has support for the [client credentials flow](https://github.com/factset/oauth2-guidelines#client-credentials-flow-1).
+The [authentication module](src/fds/sdk/utils/authentication) provides helper classes that facilitate [OAuth 2.0](https://developer.factset.com/learn/authentication-oauth2) authentication and authorization with FactSet's APIs. Currently the module has support for the [client credentials flow](https://github.com/factset/oauth2-guidelines#client-credentials-flow-1).
 
 Each helper class in the module has the following features:
 
