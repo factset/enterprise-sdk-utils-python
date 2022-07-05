@@ -28,7 +28,7 @@ pytest = "^7.0"
 black = {version = "^22.6", allow-prereleases = true}
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
-tox = "^3.25.0"
+tox = "^3.25.1"
 tox-gh-actions = "^2.6.0"
 
 [tool.black]
