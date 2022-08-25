@@ -36,6 +36,7 @@ First, you need to create the OAuth 2.0 client configuration that will be used t
 from fds.sdk.utils.authentication import ConfidentialClient
 import requests
 
+# The ConfidentialClient instance should be reused in production environments.
 client = ConfidentialClient('/path/to/config.json')
 res = requests.get(
   'https://api.factset.com/analytics/lookups/v3/currencies',
@@ -59,6 +60,7 @@ Each helper class in the module has the following features:
 * Accepts a configuration file or `dict` that contains information about the OAuth 2.0 client, including the client ID and private key.
 * Performs authentication with FactSet's OAuth 2.0 authorization server and retrieves an access token.
 * Caches the access token for reuse and requests a new access token as needed when one expires.
+  * In order for this to work correctly, the helper class instance should be reused in production environments.
 
 #### Configuration
 
