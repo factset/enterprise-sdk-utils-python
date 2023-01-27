@@ -166,6 +166,24 @@ def test_constructor_session_instantiation(mocker, example_config):
     mock_oauth2_session.assert_called_with(client=backend_result)
 
 
+def test_constructor_session_instantiation_with_additional_parameters(mocker, example_config):
+    test_client_id = "good_test"
+    backend_result = "good_mock_backend"
+    example_config["clientId"] = test_client_id
+    mock_oauth_backend = mocker.patch(
+        "fds.sdk.utils.authentication.confidential.BackendApplicationClient", return_value=backend_result
+    )
+
+    mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
+
+    additional_parameters = {"proxy": "http://my:pass@test.test.test", "verify_ssl": False, "proxy_headers": {}}
+
+    ConfidentialClient(config=example_config, **additional_parameters)
+
+    mock_oauth_backend.assert_called_with(client_id=test_client_id)
+    mock_oauth2_session.assert_called_with(client=backend_result)
+
+
 def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
     caplog.set_level(logging.DEBUG)
     mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
@@ -188,7 +206,7 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
 
     client = ConfidentialClient(config=example_config)
 
-    get_mock.assert_called_with(auth_test)
+    get_mock.assert_called_with(url=auth_test)
     assert client
 
     assert "Attempting metadata retrieval from well_known_uri: https://auth.test" in caplog.text
@@ -325,6 +343,12 @@ def test_get_access_token_fetch(client, mocker):
         client_id="test-clientid",
         client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
         client_assertion="jws",
+        proxies=None,
+        verify=True,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
     )
 
 

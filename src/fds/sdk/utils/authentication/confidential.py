@@ -33,7 +33,14 @@ class ConfidentialClient(OAuth2Client):
     the access token, caching it and refreshing it as needed.
     """
 
-    def __init__(self, config_path: str = "", config: dict = None) -> None:
+    def __init__(
+        self,
+        config_path: str = "",
+        config: dict = None,
+        proxy: dict = None,
+        verify_ssl: bool = True,
+        proxy_headers: dict = None,
+    ) -> None:
         """
         Creates a new ConfidentialClient.
 
@@ -70,7 +77,23 @@ class ConfidentialClient(OAuth2Client):
                     }
                 }
 
-                `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are required for authorization.
+                `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are
+                required for authorization.
+
+            `proxy` (dict) : Dictionary to tell the client which proxies should be used
+
+                `Example Proxy Settings`
+                {
+                    "http": "http://10.10.10.10:8000",
+                    "https”: "http://10.10.10.10:8000",
+                }
+
+            `verify_ssl` (bool): Toggles the verification of SSL Certificates, could be used if a proxy or firewall
+            uses self-signed certificates
+
+            `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
+            use a proxy or firewall
+
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
             AuthServerMetadataContentError: Raised if the authorization server metadata is incomplete
@@ -84,7 +107,7 @@ class ConfidentialClient(OAuth2Client):
             raise ValueError("Either 'config_path' or 'config' must be set.")
 
         if config_path and config:
-            raise ValueError("Either 'config_path' or 'config' must be set.  Not Both.")
+            raise ValueError("Either 'config_path' or 'config' must be set. Not Both.")
 
         if config_path:
             try:
@@ -96,6 +119,14 @@ class ConfidentialClient(OAuth2Client):
 
         if config:
             self._config = config
+
+        if proxy:
+            self._proxies = {"http": proxy, "https": proxy}
+        else:
+            self._proxies = None
+
+        self._verify_ssl = verify_ssl
+        self._proxy_headers = proxy_headers
 
         try:
             self._oauth_session = OAuth2Session(
@@ -127,7 +158,17 @@ class ConfidentialClient(OAuth2Client):
             log.debug(
                 "Attempting metadata retrieval from well_known_uri: %s", self._config[CONSTS.CONFIG_WELL_KNOWN_URI]
             )
-            res = requests.get(self._config[CONSTS.CONFIG_WELL_KNOWN_URI])
+
+            with requests.Session() as session:
+                if self._proxies:
+                    session.proxies = self._proxies
+
+                if self._proxy_headers:
+                    session.headers.update(self._proxy_headers)
+
+                session.verify = self._verify_ssl
+
+                res = requests.get(url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI])
             log.debug("Request from well_known_uri completed with status: %s", res.status_code)
             log.debug("Response headers from well_known_uri were %s", res.headers)
             self._well_known_uri_metadata = res.json()
@@ -208,11 +249,23 @@ class ConfidentialClient(OAuth2Client):
 
         try:
             log.debug("Fetching new access token")
+
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            }
+
+            if self._proxy_headers:
+                headers |= self._proxy_headers
+
             token = self._oauth_session.fetch_token(
                 token_url=self._well_known_uri_metadata[CONSTS.META_TOKEN_ENDPOINT],
                 client_id=self._config[CONSTS.CONFIG_CLIENT_ID],
                 client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 client_assertion=self._get_client_assertion_jws(),
+                verify=self._verify_ssl,
+                proxies=self._proxies,
+                headers=headers,
             )
             self._cached_token = token
             log.info("Caching token that expires at %s", token[CONSTS.TOKEN_EXPIRES_AT])
