@@ -17,7 +17,6 @@ def test_bad_instantiation():
 
 
 def test_good_instantiation():
-
     ret_val = "good_token"
 
     class good_class(OAuth2Client):
