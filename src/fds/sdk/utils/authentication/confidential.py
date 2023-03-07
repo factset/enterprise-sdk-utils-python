@@ -38,7 +38,7 @@ class ConfidentialClient(OAuth2Client):
         config_path: str = "",
         config: dict = None,
         proxy: dict = None,
-        verify_ssl: bool = True,
+        verify_ssl=True,
         proxy_headers: dict = None,
     ) -> None:
         """
@@ -88,8 +88,12 @@ class ConfidentialClient(OAuth2Client):
                     "https”: "http://10.10.10.10:8000",
                 }
 
-            `verify_ssl` (bool): Toggles the verification of SSL Certificates, could be used if a proxy or firewall
-            uses self-signed certificates
+            `verify_ssl` (bool | string): Either a boolean, in which case it controls whether we verify the server's
+            TLS certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults
+            to ``True``. When set to ``False``, requests will accept any TLS certificate presented by the server,
+            and will ignore hostname mismatches and/or expired certificates, which will make your application
+            vulnerable to man-in-the-middle (MitM) attacks. Setting verify to ``False`` may be useful during
+            local development or testing.
 
             `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
             use a proxy or firewall
@@ -121,7 +125,11 @@ class ConfidentialClient(OAuth2Client):
             self._config = config
 
         if proxy:
-            self._proxies = {"http": proxy, "https": proxy}
+            self._proxies = {}
+            if proxy['http']:
+                self._proxies['http'] = proxy['http']
+            if proxy['https']:
+                self._proxies['https'] = proxy['https']
         else:
             self._proxies = None
 
