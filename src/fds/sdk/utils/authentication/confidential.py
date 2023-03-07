@@ -126,10 +126,10 @@ class ConfidentialClient(OAuth2Client):
 
         if proxy:
             self._proxies = {}
-            if proxy['http']:
-                self._proxies['http'] = proxy['http']
-            if proxy['https']:
-                self._proxies['https'] = proxy['https']
+            if "http" in proxy:
+                self._proxies["http"] = proxy["http"]
+            if "https" in proxy:
+                self._proxies["https"] = proxy["https"]
         else:
             self._proxies = None
 

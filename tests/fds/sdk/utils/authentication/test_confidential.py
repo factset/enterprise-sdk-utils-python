@@ -176,7 +176,7 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
 
     mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
 
-    additional_parameters = {"proxy": "http://my:pass@test.test.test", "verify_ssl": False, "proxy_headers": {}}
+    additional_parameters = {"proxy": {"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"}, "verify_ssl": False, "proxy_headers": {}}
 
     ConfidentialClient(config=example_config, **additional_parameters)
 
