@@ -37,9 +37,9 @@ class ConfidentialClient(OAuth2Client):
         self,
         config_path: str = "",
         config: dict = None,
-        proxy: dict = None,
-        verify_ssl=True,
+        proxies: dict = None,
         proxy_headers: dict = None,
+        verify_ssl=True,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -80,13 +80,16 @@ class ConfidentialClient(OAuth2Client):
                 `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are
                 required for authorization.
 
-            `proxy` (dict) : Dictionary to tell the client which proxies should be used
+            `proxies` (dict) : Dictionary to tell the client which proxies should be used
 
                 `Example Proxy Settings`
                 {
                     "http": "http://10.10.10.10:8000",
                     "https”: "http://10.10.10.10:8000",
                 }
+
+            `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
+            use a proxy or firewall
 
             `verify_ssl` (bool | string): Either a boolean, in which case it controls whether we verify the server's
             TLS certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults
@@ -95,8 +98,6 @@ class ConfidentialClient(OAuth2Client):
             vulnerable to man-in-the-middle (MitM) attacks. Setting verify to ``False`` may be useful during
             local development or testing.
 
-            `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
-            use a proxy or firewall
 
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
@@ -124,12 +125,8 @@ class ConfidentialClient(OAuth2Client):
         if config:
             self._config = config
 
-        if proxy:
-            self._proxies = {}
-            if "http" in proxy:
-                self._proxies["http"] = proxy["http"]
-            if "https" in proxy:
-                self._proxies["https"] = proxy["https"]
+        if proxies:
+            self._proxies = proxies
         else:
             self._proxies = None
 
