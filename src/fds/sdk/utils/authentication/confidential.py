@@ -35,11 +35,12 @@ class ConfidentialClient(OAuth2Client):
 
     def __init__(
         self,
-        config_path: str = "",
+        config_path: str = None,
         config: dict = None,
-        proxies: dict = None,
+        proxy: str = None,
         proxy_headers: dict = None,
-        verify_ssl=True,
+        verify_ssl: bool = True,
+        ssl_ca_cert: str = None,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -80,23 +81,19 @@ class ConfidentialClient(OAuth2Client):
                 `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are
                 required for authorization.
 
-            `proxies` (dict) : Dictionary to tell the client which proxies should be used
-
-                `Example Proxy Settings`
-                {
-                    "http": "http://10.10.10.10:8000",
-                    "https”: "http://10.10.10.10:8000",
-                }
+            `proxy` (str) : Proxy URL
 
             `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
             use a proxy or firewall
 
-            `verify_ssl` (bool | string): Either a boolean, in which case it controls whether we verify the server's
-            TLS certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults
-            to ``True``. When set to ``False``, requests will accept any TLS certificate presented by the server,
+            `verify_ssl` (bool): Set this to ``False`` to skip verifying SSL certificate when calling API from
+            https server. When set to ``False``, requests will accept any TLS certificate presented by the server,
             and will ignore hostname mismatches and/or expired certificates, which will make your application
             vulnerable to man-in-the-middle (MitM) attacks. Setting verify to ``False`` may be useful during
             local development or testing.
+
+            `ssl_ca_cert` (str): Set this to customize the certificate file to verify the peer. If ``ssl_ca_cert`` is
+            set, the ca_cert will be verified whether ``verify_ssl`` is enabled
 
 
         Raises:
@@ -125,13 +122,14 @@ class ConfidentialClient(OAuth2Client):
         if config:
             self._config = config
 
-        if proxies:
-            self._proxies = proxies
+        if proxy:
+            self._proxy = {"http": proxy, "https": proxy}
         else:
-            self._proxies = None
+            self._proxy = None
 
         self._verify_ssl = verify_ssl
         self._proxy_headers = proxy_headers
+        self._ssl_ca_cert = ssl_ca_cert
 
         try:
             self._oauth_session = OAuth2Session(
@@ -164,16 +162,17 @@ class ConfidentialClient(OAuth2Client):
                 "Attempting metadata retrieval from well_known_uri: %s", self._config[CONSTS.CONFIG_WELL_KNOWN_URI]
             )
 
-            with requests.Session() as session:
-                if self._proxies:
-                    session.proxies = self._proxies
+            verify = self._verify_ssl
 
-                if self._proxy_headers:
-                    session.headers.update(self._proxy_headers)
+            if self._ssl_ca_cert:
+                verify = self._ssl_ca_cert
 
-                session.verify = self._verify_ssl
-
-                res = requests.get(url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI])
+            res = requests.get(
+                url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
+                proxies=self._proxy,
+                verify=verify,
+                headers=self._proxy_headers,
+            )
             log.debug("Request from well_known_uri completed with status: %s", res.status_code)
             log.debug("Response headers from well_known_uri were %s", res.headers)
             self._well_known_uri_metadata = res.json()
@@ -263,13 +262,17 @@ class ConfidentialClient(OAuth2Client):
             if self._proxy_headers:
                 headers |= self._proxy_headers
 
+            verify = self._verify_ssl
+            if self._ssl_ca_cert:
+                verify = self._ssl_ca_cert
+
             token = self._oauth_session.fetch_token(
                 token_url=self._well_known_uri_metadata[CONSTS.META_TOKEN_ENDPOINT],
                 client_id=self._config[CONSTS.CONFIG_CLIENT_ID],
                 client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 client_assertion=self._get_client_assertion_jws(),
-                verify=self._verify_ssl,
-                proxies=self._proxies,
+                verify=verify,
+                proxies=self._proxy,
                 headers=headers,
             )
             self._cached_token = token

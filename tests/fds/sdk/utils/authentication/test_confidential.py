@@ -177,15 +177,30 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
     mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
 
     additional_parameters = {
-        "proxies": {"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
+        "proxy": "http://my:pass@test.test.test",
         "verify_ssl": False,
         "proxy_headers": {},
     }
+
+    class AuthServerMetadataRes:
+        status_code = 200
+        headers = {"header": "value"}
+
+        def json(self):
+            return {"issuer": "test", "token_endpoint": "http://test.test"}
+
+    get_mock = mocker.patch("requests.get", return_value=AuthServerMetadataRes())
 
     ConfidentialClient(config=example_config, **additional_parameters)
 
     mock_oauth_backend.assert_called_with(client_id=test_client_id)
     mock_oauth2_session.assert_called_with(client=backend_result)
+    get_mock.assert_called_with(
+        url="https://auth.factset.com/.well-known/openid-configuration",
+        proxies={"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
+        verify=False,
+        headers={},
+    )
 
 
 def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
@@ -210,7 +225,7 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
 
     client = ConfidentialClient(config=example_config)
 
-    get_mock.assert_called_with(url=auth_test)
+    get_mock.assert_called_with(url=auth_test, proxies=None, verify=True, headers=None)
     assert client
 
     assert "Attempting metadata retrieval from well_known_uri: https://auth.test" in caplog.text
