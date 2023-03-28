@@ -73,7 +73,7 @@ client = ConfidentialClient(
 If you have proxies or firewalls which are using custom TLS certificates,
 you are able to pass a custom pem file (`ssl_ca_cert` parameter) so that the
 request library is able to verify the validity of that certificate. If a
-ca cert is passed it is validated whether `verify_ssl` is set to true.
+ca cert is passed it is validated regardless if `verify_ssl` is set to false.
 
 With `verify_ssl` it is possible to disable the verifications of certificates.
 Disabling the verification is not recommended, but it might be useful during
