@@ -37,7 +37,9 @@ from fds.sdk.utils.authentication import ConfidentialClient
 import requests
 
 # The ConfidentialClient instance should be reused in production environments.
-client = ConfidentialClient('/path/to/config.json')
+client = ConfidentialClient(
+  config_path='/path/to/config.json'
+)
 res = requests.get(
   'https://api.factset.com/analytics/lookups/v3/currencies',
   headers={
@@ -45,6 +47,47 @@ res = requests.get(
   })
 
 print(res.text)
+```
+
+### Configure a Proxy
+
+You can pass proxy settings to the ConfidentialClient if necessary.
+The `proxy` parameter takes a URL to tell the request library which proxy should be used.
+
+If necessary it is possible to set custom `proxy_headers` as dictionary.
+
+```python
+from fds.sdk.utils.authentication import ConfidentialClient
+
+client = ConfidentialClient(
+  config_path='/path/to/config.json',
+  proxy= "http://secret:password@localhost:5050",
+  proxy_headers={
+    "Custom-Proxy-Header": "Custom-Proxy-Header-Value"
+  }
+)
+```
+
+### Custom SSL Certificate
+
+If you have proxies or firewalls which are using custom TLS certificates,
+you are able to pass a custom pem file (`ssl_ca_cert` parameter) so that the
+request library is able to verify the validity of that certificate. If a
+ca cert is passed it is validated regardless if `verify_ssl` is set to false.
+
+With `verify_ssl` it is possible to disable the verifications of certificates.
+Disabling the verification is not recommended, but it might be useful during
+local development or testing
+
+
+```python
+from fds.sdk.utils.authentication import ConfidentialClient
+
+client = ConfidentialClient(
+  config_path='/path/to/config.json',
+  verify_ssl=True,
+  ssl_ca_cert='/path/to/ca.pem'
+)
 ```
 
 ## Modules

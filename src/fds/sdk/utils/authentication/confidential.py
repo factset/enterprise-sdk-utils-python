@@ -33,7 +33,15 @@ class ConfidentialClient(OAuth2Client):
     the access token, caching it and refreshing it as needed.
     """
 
-    def __init__(self, config_path: str = "", config: dict = None) -> None:
+    def __init__(
+        self,
+        config_path: str = None,
+        config: dict = None,
+        proxy: str = None,
+        proxy_headers: dict = None,
+        verify_ssl: bool = True,
+        ssl_ca_cert: str = None,
+    ) -> None:
         """
         Creates a new ConfidentialClient.
 
@@ -70,7 +78,24 @@ class ConfidentialClient(OAuth2Client):
                     }
                 }
 
-                `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are required for authorization.
+                `NB`: Within the JWK parameters kty, alg, use, kid, n, e, d, p, q, dp, dq, qi are
+                required for authorization.
+
+            `proxy` (str) : Proxy URL
+
+            `proxy_headers` (dict) : Sometimes it is necessary to add custom headers to http requests to be able to
+            use a proxy or firewall
+
+            `verify_ssl` (bool): Set this to ``False`` to skip verifying SSL certificate when calling API from
+            https server. When set to ``False``, requests will accept any TLS certificate presented by the server,
+            and will ignore hostname mismatches and/or expired certificates, which will make your application
+            vulnerable to man-in-the-middle (MitM) attacks. Setting verify to ``False`` may be useful during
+            local development or testing.
+
+            `ssl_ca_cert` (str): Set this to customize the certificate file to verify the peer. If ``ssl_ca_cert`` is
+            set, the ca_cert will be verified whether ``verify_ssl`` is enabled
+
+
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
             AuthServerMetadataContentError: Raised if the authorization server metadata is incomplete
@@ -84,7 +109,7 @@ class ConfidentialClient(OAuth2Client):
             raise ValueError("Either 'config_path' or 'config' must be set.")
 
         if config_path and config:
-            raise ValueError("Either 'config_path' or 'config' must be set.  Not Both.")
+            raise ValueError("Either 'config_path' or 'config' must be set. Not Both.")
 
         if config_path:
             try:
@@ -96,6 +121,15 @@ class ConfidentialClient(OAuth2Client):
 
         if config:
             self._config = config
+
+        if proxy:
+            self._proxy = {"http": proxy, "https": proxy}
+        else:
+            self._proxy = None
+
+        self._verify_ssl = verify_ssl
+        self._proxy_headers = proxy_headers
+        self._ssl_ca_cert = ssl_ca_cert
 
         try:
             self._oauth_session = OAuth2Session(
@@ -127,7 +161,18 @@ class ConfidentialClient(OAuth2Client):
             log.debug(
                 "Attempting metadata retrieval from well_known_uri: %s", self._config[CONSTS.CONFIG_WELL_KNOWN_URI]
             )
-            res = requests.get(self._config[CONSTS.CONFIG_WELL_KNOWN_URI])
+
+            verify = self._verify_ssl
+
+            if self._ssl_ca_cert:
+                verify = self._ssl_ca_cert
+
+            res = requests.get(
+                url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
+                proxies=self._proxy,
+                verify=verify,
+                headers=self._proxy_headers,
+            )
             log.debug("Request from well_known_uri completed with status: %s", res.status_code)
             log.debug("Response headers from well_known_uri were %s", res.headers)
             self._well_known_uri_metadata = res.json()
@@ -208,11 +253,27 @@ class ConfidentialClient(OAuth2Client):
 
         try:
             log.debug("Fetching new access token")
+
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            }
+
+            if self._proxy_headers:
+                headers |= self._proxy_headers
+
+            verify = self._verify_ssl
+            if self._ssl_ca_cert:
+                verify = self._ssl_ca_cert
+
             token = self._oauth_session.fetch_token(
                 token_url=self._well_known_uri_metadata[CONSTS.META_TOKEN_ENDPOINT],
                 client_id=self._config[CONSTS.CONFIG_CLIENT_ID],
                 client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 client_assertion=self._get_client_assertion_jws(),
+                verify=verify,
+                proxies=self._proxy,
+                headers=headers,
             )
             self._cached_token = token
             log.info("Caching token that expires at %s", token[CONSTS.TOKEN_EXPIRES_AT])
