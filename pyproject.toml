@@ -29,7 +29,7 @@ black = {version = "^23.3", allow-prereleases = true}
 pytest-cov = "^4.0.0"
 pytest-mock = "^3.6.1"
 tox = "^4.4.8"
-tox-gh-actions = "^3.0.0"
+tox-gh-actions = "^3.1.0"
 
 [tool.black]
 line-length = 120
