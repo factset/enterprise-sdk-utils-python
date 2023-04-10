@@ -24,7 +24,7 @@ requests = "^2.28.2"
 oauthlib = "^3.2.2"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.2"
+pytest = "^7.3"
 black = {version = "^23.3", allow-prereleases = true}
 pytest-cov = "^4.0.0"
 pytest-mock = "^3.6.1"
