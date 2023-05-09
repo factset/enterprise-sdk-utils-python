@@ -10,6 +10,7 @@ on:
 
 jobs:
   check-title:
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
     name: Check title
     runs-on: ubuntu-20.04
 
