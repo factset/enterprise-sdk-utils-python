@@ -6,7 +6,10 @@ import uuid
 import requests
 from jose import JWSError, jws
 from oauthlib.oauth2 import BackendApplicationClient
+from requests import Session
+from requests.adapters import HTTPAdapter
 from requests_oauthlib import OAuth2Session
+from urllib3 import Retry
 
 from .constants import CONSTS
 from .oauth2client import OAuth2Client
@@ -135,6 +138,7 @@ class ConfidentialClient(OAuth2Client):
             self._oauth_session = OAuth2Session(
                 client=BackendApplicationClient(client_id=self._config[CONSTS.CONFIG_CLIENT_ID])
             )
+            self._setup_request_retries(self._oauth_session)
         except Exception as e:
             raise ConfidentialClientError(
                 f"Error instantiating OAuth2 session with {CONSTS.CONFIG_CLIENT_ID}:{self._config[CONSTS.CONFIG_CLIENT_ID]}"
@@ -152,9 +156,21 @@ class ConfidentialClient(OAuth2Client):
 
         log.debug("Credentials are complete and formatted correctly")
 
+        self._requests_session = Session()
+        self._setup_request_retries(self._requests_session)
+
         self._init_auth_server_metadata()
 
         self._cached_token = {}
+
+    def _setup_request_retries(self, session: Session) -> None:
+        retries = Retry(
+            total=5,
+            backoff_factor=0.1,
+            status_forcelist=[500, 502, 503, 504],
+            allowed_methods={"GET", "POST"},
+        )
+        session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def _init_auth_server_metadata(self) -> None:
         try:
@@ -167,7 +183,7 @@ class ConfidentialClient(OAuth2Client):
             if self._ssl_ca_cert:
                 verify = self._ssl_ca_cert
 
-            res = requests.get(
+            res = self._requests_session.get(
                 url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
                 proxies=self._proxy,
                 verify=verify,
