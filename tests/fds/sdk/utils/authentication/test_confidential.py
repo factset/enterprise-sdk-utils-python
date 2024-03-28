@@ -46,7 +46,7 @@ def client(mocker, example_config):
         "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
         return_value={"access_token": "test-token", "expires_at": 10},
     )
-    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.get")
+    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.Session.get")
     mock_get.return_value.json.return_value = {
         "issuer": "test-issuer",
         "token_endpoint": "https://test.token.endpoint",
@@ -75,7 +75,7 @@ def test_constructor_with_config(mocker, example_config, caplog):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
     caplog.set_level(logging.DEBUG)
-    mocker.patch("requests.get", return_value=AuthServerMetadataRes())
+    mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
 
     client = ConfidentialClient(config=example_config)
 
@@ -104,7 +104,7 @@ def test_constructor_with_file(mocker, example_config, caplog):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
     caplog.set_level(logging.DEBUG)
-    mocker.patch("requests.get", return_value=AuthServerMetadataRes())
+    mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
     mocker.patch("json.load", return_value=example_config)
     fake_file_path = "/my/fake/path/creds.json"
 
@@ -189,7 +189,7 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
-    get_mock = mocker.patch("requests.get", return_value=AuthServerMetadataRes())
+    get_mock = mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
 
     ConfidentialClient(config=example_config, **additional_parameters)
 
@@ -218,7 +218,7 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
-    get_mock = mocker.patch("requests.get", return_value=AuthServerMetadataRes())
+    get_mock = mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
     auth_test = "https://auth.test"
 
     example_config["wellKnownUri"] = auth_test
@@ -237,7 +237,7 @@ def test_constructor_metadata_error(mocker, example_config):
         "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
         return_value={"access_token": "test", "expires_at": 10},
     )
-    mocker.patch("requests.get", side_effect=Exception("error"))
+    mocker.patch("requests.Session.get", side_effect=Exception("error"))
     with pytest.raises(AuthServerMetadataError):
         ConfidentialClient(config=example_config)
 
@@ -256,7 +256,7 @@ def test_constructor_missing_metadata(mocker, example_config):
         def json():
             return {}
 
-    mocker.patch("requests.get", return_value=AuthServerMetadataRes)
+    mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes)
 
     with pytest.raises(AuthServerMetadataContentError):
         ConfidentialClient(config=example_config)
@@ -392,7 +392,7 @@ def test_get_access_token_fetch_error(client, mocker, caplog):
 
 def test_get_access_token_cached(example_config, mocker, caplog):
     caplog.set_level(logging.DEBUG)
-    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.get")
+    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.Session.get")
     mock_get.return_value.json.return_value = {
         "issuer": "test-issuer",
         "token_endpoint": "https://test.token.endpoint",

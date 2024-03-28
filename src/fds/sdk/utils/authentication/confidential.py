@@ -6,7 +6,10 @@ import uuid
 import requests
 from jose import JWSError, jws
 from oauthlib.oauth2 import BackendApplicationClient
+from requests import Session
+from requests.adapters import HTTPAdapter
 from requests_oauthlib import OAuth2Session
+from urllib3 import Retry
 
 from .constants import CONSTS
 from .oauth2client import OAuth2Client
@@ -41,6 +44,7 @@ class ConfidentialClient(OAuth2Client):
         proxy_headers: dict = None,
         verify_ssl: bool = True,
         ssl_ca_cert: str = None,
+        retry: Retry = None,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -95,6 +99,8 @@ class ConfidentialClient(OAuth2Client):
             `ssl_ca_cert` (str): Set this to customize the certificate file to verify the peer. If ``ssl_ca_cert`` is
             set, the ca_cert will be verified whether ``verify_ssl`` is enabled
 
+            `retry` (Retry): Set this to custommize the retry policy for the requests. If not set, the default is used.
+
 
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
@@ -131,10 +137,21 @@ class ConfidentialClient(OAuth2Client):
         self._proxy_headers = proxy_headers
         self._ssl_ca_cert = ssl_ca_cert
 
+        if retry is not None:
+            self._retry = retry
+        else:
+            self._retry = Retry(
+                total=3,
+                backoff_factor=0.1,
+                status_forcelist=[413, 429, 500, 502, 503, 504],
+                allowed_methods={"DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT", "TRACE"},
+            )
+
         try:
             self._oauth_session = OAuth2Session(
                 client=BackendApplicationClient(client_id=self._config[CONSTS.CONFIG_CLIENT_ID])
             )
+            self._oauth_session.mount("https://", HTTPAdapter(max_retries=self._retry))
         except Exception as e:
             raise ConfidentialClientError(
                 f"Error instantiating OAuth2 session with {CONSTS.CONFIG_CLIENT_ID}:{self._config[CONSTS.CONFIG_CLIENT_ID]}"
@@ -152,6 +169,9 @@ class ConfidentialClient(OAuth2Client):
 
         log.debug("Credentials are complete and formatted correctly")
 
+        self._requests_session = Session()
+        self._requests_session.mount("https://", HTTPAdapter(max_retries=self._retry))
+
         self._init_auth_server_metadata()
 
         self._cached_token = {}
@@ -167,7 +187,7 @@ class ConfidentialClient(OAuth2Client):
             if self._ssl_ca_cert:
                 verify = self._ssl_ca_cert
 
-            res = requests.get(
+            res = self._requests_session.get(
                 url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
                 proxies=self._proxy,
                 verify=verify,
