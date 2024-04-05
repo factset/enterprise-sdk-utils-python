@@ -142,7 +142,7 @@ class ConfidentialClient(OAuth2Client):
         else:
             self._retry = Retry(
                 total=3,
-                backoff_factor=0.1,
+                backoff_factor=1,
                 status_forcelist=[413, 429, 500, 502, 503, 504],
                 allowed_methods={"DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT", "TRACE"},
             )
