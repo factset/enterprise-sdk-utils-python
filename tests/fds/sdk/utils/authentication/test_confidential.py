@@ -46,11 +46,14 @@ def client(mocker, example_config):
         "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
         return_value={"access_token": "test-token", "expires_at": 10},
     )
-    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.Session.get")
+
+    mock_get = mocker.patch("requests.Session.get")
     mock_get.return_value.json.return_value = {
         "issuer": "test-issuer",
         "token_endpoint": "https://test.token.endpoint",
     }
+
+    mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
 
     return ConfidentialClient(config=example_config)
 
@@ -253,6 +256,7 @@ def test_constructor_missing_metadata(mocker, example_config):
         status_code = 200
         headers = {"header": "value"}
 
+        @staticmethod
         def json():
             return {}
 
@@ -288,7 +292,7 @@ def test_missing_jwk_data(mocker, example_config):
 
 def test_get_access_token(client, mocker, caplog):
     caplog.set_level(logging.INFO)
-    mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
 
     assert client.get_access_token() == "test-token"
 
@@ -303,12 +307,12 @@ def test_get_access_token_jws_sign(client, example_config, mocker):
         2000,
     )
     mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
-    mock_jws_sign = mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mock_jws_sign = mocker.patch("joserfc.jwt.encode", return_value="jws")
 
     client.get_access_token()
 
     mock_jws_sign.assert_called_once_with(
-        payload={
+        claims={
             "sub": "test-clientid",
             "iss": "test-clientid",
             "aud": ["test-issuer"],
@@ -317,9 +321,8 @@ def test_get_access_token_jws_sign(client, example_config, mocker):
             "exp": 2000,
             "jti": "uuid",
         },
-        key=example_config["jwk"],
-        algorithm="RS256",
-        headers={"kid": "jwk_kid"},
+        key="jwk",
+        header={"kid": "jwk_kid", "alg": "RS256"},
     )
 
 
@@ -331,8 +334,9 @@ def test_get_access_token_jws_sign_error(client, mocker, caplog):
         2000,
     )
     mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
+
     mocker.patch(
-        "fds.sdk.utils.authentication.confidential.jws.sign",
+        "joserfc.jwt.encode",
         side_effect=Exception("fail!"),
     )
 
@@ -353,7 +357,8 @@ def test_get_access_token_fetch(client, mocker):
         2000,
     )
     mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
-    mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
+    mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
 
     client.get_access_token()
 
@@ -382,7 +387,8 @@ def test_get_access_token_fetch_error(client, mocker, caplog):
         2000,
     )
     mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
-    mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
+    mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
 
     with pytest.raises(AccessTokenError):
         client.get_access_token()
@@ -392,12 +398,13 @@ def test_get_access_token_fetch_error(client, mocker, caplog):
 
 def test_get_access_token_cached(example_config, mocker, caplog):
     caplog.set_level(logging.DEBUG)
-    mock_get = mocker.patch("fds.sdk.utils.authentication.confidential.requests.Session.get")
+    mock_get = mocker.patch("requests.Session.get")
     mock_get.return_value.json.return_value = {
         "issuer": "test-issuer",
         "token_endpoint": "https://test.token.endpoint",
     }
-    mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
+    mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
     mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
     mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
     mock_oauth2_session.return_value.fetch_token.return_value = {
@@ -416,7 +423,7 @@ def test_get_access_token_cached(example_config, mocker, caplog):
 
 def test_get_access_token_cache_expired(client, mocker, caplog):
     caplog.set_level(logging.DEBUG)
-    mocker.patch("fds.sdk.utils.authentication.confidential.jws.sign", return_value="jws")
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
     mock_oauth2_session = mocker.patch(
         "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
         return_value={

@@ -3,8 +3,8 @@ import logging
 import time
 import uuid
 
-import requests
-from jose import JWSError, jws
+from joserfc import jwt
+from joserfc.jwk import RSAKey
 from oauthlib.oauth2 import BackendApplicationClient
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -216,9 +216,11 @@ class ConfidentialClient(OAuth2Client):
 
     def _get_client_assertion_jws(self) -> str:
         issued_at = time.time()
+        key = RSAKey.import_key(self._config["jwk"])
+
         try:
-            return jws.sign(
-                payload={
+            return jwt.encode(
+                claims={
                     "sub": self._config[CONSTS.CONFIG_CLIENT_ID],
                     "iss": self._config[CONSTS.CONFIG_CLIENT_ID],
                     "aud": [self._well_known_uri_metadata[CONSTS.META_ISSUER]],
@@ -227,12 +229,14 @@ class ConfidentialClient(OAuth2Client):
                     "exp": issued_at + CONSTS.CC_JWT_EXPIRE_AFTER_SECS,
                     "jti": str(uuid.uuid4()),
                 },
-                key=self._config[CONSTS.CONFIG_JWK],
-                algorithm=self._config[CONSTS.CONFIG_JWK][CONSTS.JWK_ALG],
-                headers={"kid": self._config[CONSTS.CONFIG_JWK][CONSTS.JWK_KID]},
+                key=key,
+                header={
+                    "kid": self._config[CONSTS.CONFIG_JWK][CONSTS.JWK_KID],
+                    "alg": self._config[CONSTS.CONFIG_JWK][CONSTS.JWK_ALG],
+                },
             )
-        except JWSError as je:
-            raise JWSSigningError("Error attempting to sign JWS") from je
+        except ValueError as value_error:
+            raise JWSSigningError("Error attempting to sign JWS") from value_error
 
     def _is_cached_token_valid(self) -> bool:
         if not self._cached_token:
