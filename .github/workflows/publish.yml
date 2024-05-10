@@ -3,12 +3,14 @@ name: Publish
 on:
   release:
     types: [published]
+  pull_request:
 
 jobs:
   deploy:
     name: Deploy to package index
     runs-on: ubuntu-20.04
     env:
+      PYTHON_VERSION: 3.9
       REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
       REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
@@ -20,7 +22,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: $PYTHON_VERSION
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          activate-environment: foo
+          python-version: $PYTHON_VERSION
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -34,6 +43,11 @@ jobs:
         run: |
           poetry build
 
-      - name: Publish
+      - name: Publish to Anaconda
+        shell: bash -el {0}
         run: |
-          poetry publish -r publish
+          conda install grayskull conda-build anaconda-client
+          conda info
+          conda list
+          grayskull --version
+          anaconda --version
