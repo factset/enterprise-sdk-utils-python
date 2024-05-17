@@ -203,7 +203,7 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
         url="https://auth.factset.com/.well-known/openid-configuration",
         proxies={"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
         verify=False,
-        headers={"User-Agent": f"fds-sdk/python/utils/1.1.2 ({platform}; Python {platform.python_version()})"},
+        headers={"User-Agent": f"fds-sdk/python/utils/1.1.2 ({platform.system()}; Python {platform.python_version()})"},
     )
 
 
