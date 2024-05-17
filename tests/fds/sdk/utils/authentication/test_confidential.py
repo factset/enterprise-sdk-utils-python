@@ -202,7 +202,7 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
         url="https://auth.factset.com/.well-known/openid-configuration",
         proxies={"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
         verify=False,
-        headers={},
+        headers={"User-Agent": "fds-sdk/python/utils/1.1.2 (Linux; Python 3.11.9)"},
     )
 
 
@@ -228,7 +228,12 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
 
     client = ConfidentialClient(config=example_config)
 
-    get_mock.assert_called_with(url=auth_test, proxies=None, verify=True, headers=None)
+    get_mock.assert_called_with(
+        url=auth_test,
+        proxies=None,
+        verify=True,
+        headers={"User-Agent": "fds-sdk/python/utils/1.1.2 (Linux; Python 3.11.9)"},
+    )
     assert client
 
     assert "Attempting metadata retrieval from well_known_uri: https://auth.test" in caplog.text
@@ -372,6 +377,7 @@ def test_get_access_token_fetch(client, mocker):
         headers={
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent": "fds-sdk/python/utils/1.1.2 (Linux; Python 3.11.9)",
         },
     )
 
