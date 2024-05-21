@@ -187,11 +187,16 @@ class ConfidentialClient(OAuth2Client):
             if self._ssl_ca_cert:
                 verify = self._ssl_ca_cert
 
+            headers = {
+                "User-Agent": CONSTS.USER_AGENT,
+                **(self._proxy_headers if self._proxy_headers else {}),
+            }
+
             res = self._requests_session.get(
                 url=self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
                 proxies=self._proxy,
                 verify=verify,
-                headers=self._proxy_headers,
+                headers=headers,
             )
             log.debug("Request from well_known_uri completed with status: %s", res.status_code)
             log.debug("Response headers from well_known_uri were %s", res.headers)
@@ -281,6 +286,7 @@ class ConfidentialClient(OAuth2Client):
             headers = {
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "User-Agent": CONSTS.USER_AGENT,
             }
 
             if self._proxy_headers:

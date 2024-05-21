@@ -1,3 +1,6 @@
+import platform
+
+
 class CONSTS:
     # confidential client assertion JWT
     CC_JWT_NOT_BEFORE_SECS = 5
@@ -23,6 +26,8 @@ class CONSTS:
 
     # default values
     FACTSET_WELL_KNOWN_URI = "https://auth.factset.com/.well-known/openid-configuration"
+
+    USER_AGENT = f"fds-sdk/python/utils/2.0.1 ({platform.system()}; Python {platform.python_version()})"
 
 
 CONSTS = CONSTS()
