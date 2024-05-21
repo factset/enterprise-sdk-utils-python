@@ -1,6 +1,5 @@
 import json
 import logging
-import platform
 import time
 import uuid
 
