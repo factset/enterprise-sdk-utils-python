@@ -189,7 +189,7 @@ class ConfidentialClient(OAuth2Client):
                 verify = self._ssl_ca_cert
 
             headers = {
-                "User-Agent": f"fds-sdk/python/utils/1.1.2 ({platform.system()}; Python {platform.python_version()})",
+                "User-Agent": CONSTS.USER_AGENT,
                 **(self._proxy_headers if self._proxy_headers else {}),
             }
 
@@ -287,7 +287,7 @@ class ConfidentialClient(OAuth2Client):
             headers = {
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                "User-Agent": f"fds-sdk/python/utils/1.1.2 ({platform.system()}; Python {platform.python_version()})",
+                "User-Agent": CONSTS.USER_AGENT,
             }
 
             if self._proxy_headers:
