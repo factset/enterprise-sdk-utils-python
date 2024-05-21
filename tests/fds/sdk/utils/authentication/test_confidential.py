@@ -378,7 +378,7 @@ def test_get_access_token_fetch(client, mocker):
         headers={
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent": f"fds-sdk/python/utils/1.1.2 ({platform.system()}; Python {platform.python_version()})",
+            "User-Agent": f"fds-sdk/python/utils/2.0.1 ({platform.system()}; Python {platform.python_version()})",
         },
     )
 
