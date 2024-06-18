@@ -51,3 +51,7 @@ jobs:
           conda list
           grayskull --version
           anaconda --version
+
+          grayskull pypi fds.sdk.utils
+          conda config --set anaconda_upload no
+          conda build fds.sdk.utils --output
