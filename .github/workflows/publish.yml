@@ -53,8 +53,8 @@ jobs:
           anaconda --version
 
           grayskull pypi fds.sdk.utils
-          conda config --set anaconda_upload no
-          conda build fds.sdk.utils --output
+
+          ls
 
           sed -i '' -e "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
           echo "    - mima0815" >> fds.sdk.utils/meta.yaml
@@ -63,3 +63,6 @@ jobs:
           echo "    - dgawande12" >> fds.sdk.utils/meta.yaml
 
           cat fds.sdk.utils/meta.yaml
+          
+          conda config --set anaconda_upload no
+          conda build fds.sdk.utils --output
