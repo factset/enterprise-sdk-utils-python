@@ -56,7 +56,7 @@ jobs:
 
           ls
 
-          sed -i '' -e "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
+          sed -i "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
           echo "    - mima0815" >> fds.sdk.utils/meta.yaml
           echo "    - eschmidtfds" >> fds.sdk.utils/meta.yaml
           echo "    - Filip1x9" >> fds.sdk.utils/meta.yaml
