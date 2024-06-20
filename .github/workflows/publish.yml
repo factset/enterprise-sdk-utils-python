@@ -46,35 +46,33 @@ jobs:
       - name: Publish to Anaconda
         shell: bash -el {0}
         run: |
-          conda install grayskull conda-build anaconda-client
-          conda info
-          conda list
-          grayskull --version
-          anaconda --version
-
-          grayskull pypi fds.sdk.utils
-
-          ls
-
-          sed -i "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
-          echo "    - mima0815" >> fds.sdk.utils/meta.yaml
-          echo "    - eschmidtfds" >> fds.sdk.utils/meta.yaml
-          echo "    - Filip1x9" >> fds.sdk.utils/meta.yaml
-          echo "    - dgawande12" >> fds.sdk.utils/meta.yaml
-
-          cat fds.sdk.utils/meta.yaml
-          
-          conda config --set anaconda_upload no
-          conda build fds.sdk.utils --output
-
           count=0
           max_retries=5
           while [ $count -lt $max_retries ]; do
-            if pip install fds.sdk.utils==2.0.1 --dry-run &>/dev/null; then
-              echo "Version 2.0.1 of fds.sdk.utils is available on PyPI."
+            if pip install fds.sdk.utils==2.0.0 --dry-run &>/dev/null; then
+              echo "Version 2.0.0 of fds.sdk.utils is available on PyPI."
+              
+              conda install grayskull conda-build anaconda-client
+              conda info
+              conda list
+              grayskull --version
+              anaconda --version
+    
+              grayskull pypi fds.sdk.utils==2.0.0
+    
+              sed -i "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
+              echo "    - mima0815" >> fds.sdk.utils/meta.yaml
+              echo "    - eschmidtfds" >> fds.sdk.utils/meta.yaml
+              echo "    - Filip1x9" >> fds.sdk.utils/meta.yaml
+              echo "    - dgawande12" >> fds.sdk.utils/meta.yaml
+
+              cat fds.sdk.utils/meta.yaml
+              
+              conda config --set anaconda_upload no
+              conda build fds.sdk.utils --output
               break
             else
-              echo "Version not found, rechecking in $((2 ** count)) second..."
+              echo "Version not found, rechecking in $((2 ** count)) seconds..."
               sleep $((2 ** count))
               count=$((count + 1))
             fi
