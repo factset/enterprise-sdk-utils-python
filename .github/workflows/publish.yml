@@ -66,3 +66,5 @@ jobs:
           
           conda config --set anaconda_upload no
           conda build fds.sdk.utils --output
+
+          echo "${{ github.event.release.tag_name }}"
