@@ -67,12 +67,20 @@ jobs:
           conda config --set anaconda_upload no
           conda build fds.sdk.utils --output
 
-          while true; do
+          count=0
+          max_retries=5
+          while [ $count -lt $max_retries ]; do
             if pip install fds.sdk.utils==2.0.1 --dry-run &>/dev/null; then
               echo "Version 2.0.1 of fds.sdk.utils is available on PyPI."
               break
             else
               echo "Version not found, rechecking in 1 second..."
               sleep 1
+              count=$((count + 1))
             fi
           done
+
+          if [ $count -eq $max_retries ]; then
+            echo "Maximum retries reached, package with that version was not found, publish failed."
+            exit 1
+          fi
