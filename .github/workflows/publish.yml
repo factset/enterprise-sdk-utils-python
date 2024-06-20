@@ -68,8 +68,8 @@ jobs:
           conda build fds.sdk.utils --output
 
           while true; do
-            if pip install fds.sdk.utils==2.0.0 --dry-run &>/dev/null; then
-              echo "Version 2.0.0 of fds.sdk.utils is available on PyPI."
+            if pip install fds.sdk.utils==2.0.1 --dry-run &>/dev/null; then
+              echo "Version 2.0.1 of fds.sdk.utils is available on PyPI."
               break
             else
               echo "Version not found, rechecking in 1 second..."
