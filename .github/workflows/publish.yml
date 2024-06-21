@@ -48,9 +48,11 @@ jobs:
         run: |
           count=0
           max_retries=5
+          tag=${{ github.event.release.tag_name }}
+          version=${tag#v}
           while [ $count -lt $max_retries ]; do
-            if pip install fds.sdk.utils==${{ github.event.release.tag_name }} --dry-run &>/dev/null; then
-              echo "Version ${{ github.event.release.tag_name }} of fds.sdk.utils is available on PyPI."
+            if pip install fds.sdk.utils==${version} --dry-run &>/dev/null; then
+              echo "Version ${version} of fds.sdk.utils is available on PyPI."
               
               conda install grayskull conda-build anaconda-client
               conda info
@@ -59,7 +61,7 @@ jobs:
               anaconda --version
 
               # Create meta.yaml recipe for the package pulled from PyPi
-              grayskull pypi fds.sdk.utils==${{ github.event.release.tag_name }}
+              grayskull pypi fds.sdk.utils==${version}
 
               # Modify the meta.yaml recipe-maintainers property to include all maintainers of this repo
               sed -i "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
