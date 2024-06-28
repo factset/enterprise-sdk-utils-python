@@ -74,7 +74,7 @@ jobs:
               # Build conda package
               conda config --set anaconda_upload no
               conda build fds.sdk.utils --output
-              echo "/home/runner/miniconda3/envs/${{ CONDA_ENV_NAME }}/conda-bld/noarch/fds.sdk.utils-0.9.0-py_0.tar.bz2"
+              echo "/home/runner/miniconda3/envs/$CONDA_ENV_NAME/conda-bld/noarch/fds.sdk.utils-0.9.0-py_0.tar.bz2"
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
