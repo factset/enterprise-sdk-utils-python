@@ -14,6 +14,7 @@ jobs:
       REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
       REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
+      CONDA_ENV_NAME: conda-env
 
     steps:
       - name: Checkout repository
@@ -28,7 +29,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
-          activate-environment: foo
+          activate-environment: ${{ env.CONDA_ENV_NAME }}
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Poetry
@@ -49,7 +50,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=0.9.0
+          version=0.10.0
           while [ $count -lt $max_retries ]; do
             if pip install fds.sdk.utils==${version} --dry-run &>/dev/null; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
@@ -73,6 +74,7 @@ jobs:
               # Build conda package
               conda config --set anaconda_upload no
               conda build fds.sdk.utils --output
+              echo "/home/runner/miniconda3/envs/${{ CONDA_ENV_NAME }}/conda-bld/noarch/fds.sdk.utils-0.9.0-py_0.tar.bz2"
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
