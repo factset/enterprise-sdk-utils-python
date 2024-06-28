@@ -49,7 +49,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=${tag#v}
+          version=0.9.0
           while [ $count -lt $max_retries ]; do
             if pip install fds.sdk.utils==${version} --dry-run &>/dev/null; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
@@ -75,7 +75,7 @@ jobs:
               conda build fds.sdk.utils --output
               break
             else
-              echo "Version not found, rechecking in $((2 ** count)) seconds..."
+              echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
               sleep $((2 ** count))
               count=$((count + 1))
             fi
