@@ -51,7 +51,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=0.9.0
+          version=0.10.0
           while [ $count -lt $max_retries ]; do
             if pip install fds.sdk.utils==${version} --dry-run &>/dev/null; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
@@ -72,12 +72,20 @@ jobs:
               echo "    - Filip1x9" >> fds.sdk.utils/meta.yaml
               echo "    - dgawande12" >> fds.sdk.utils/meta.yaml
 
+              # Modify meta.yaml to include description and dev_url
+              sed -i "/about:/a \\
+                dev_url: \"https://github.com/factset/enterprise-sdk-utils-python\"\\
+                description: \"This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet APIs.\"
+                " "fds.sdk.utils/meta.yaml"
+
+              cat fds.sdk.utils/meta.yaml
+
               # Build conda package
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
               conda build fds.sdk.utils
               
-              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
+              # anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
