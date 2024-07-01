@@ -75,6 +75,11 @@ jobs:
               # Build conda package
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
+
+              cd /home/runner/miniconda3/envs/conda-env/conda-bld/noarch
+              ls
+              cd /home/runner/work/enterprise-sdk-utils-python/enterprise-sdk-utils-python
+              ls
               
               anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
