@@ -76,7 +76,19 @@ jobs:
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
 
-              cd /home/runner/miniconda3/envs/conda-env/conda-bld/noarch/.cache
+              cd /home/runner/miniconda3/envs/conda-env/conda-bld/noarch
+              ls -la
+              echo "#####"
+              cd /home/runner/miniconda3/envs/conda-env/conda-bld
+              ls -la
+              echo "#####"
+              cd /home/runner/miniconda3/envs/conda-env
+              ls -la
+              echo "#####"
+              cd /home/runner/miniconda3/envs
+              ls -la
+              echo "#####"
+              cd /home/runner/miniconda
               ls -la
               echo "#####"
               cd /home/runner/work/enterprise-sdk-utils-python/enterprise-sdk-utils-python/fds.sdk.utils
