@@ -14,6 +14,7 @@ jobs:
       REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
       REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       CONDA_ENV_NAME: conda-env
 
     steps:
@@ -50,7 +51,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=0.10.0
+          version=0.9.0
           while [ $count -lt $max_retries ]; do
             if pip install fds.sdk.utils==${version} --dry-run &>/dev/null; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
@@ -74,7 +75,8 @@ jobs:
               # Build conda package
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
-              echo "${package_file}"
+              
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
