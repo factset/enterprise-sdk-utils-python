@@ -78,14 +78,12 @@ jobs:
             description: \"This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet APIs.\"
             " "fds.sdk.utils/meta.yaml"
 
-              cat fds.sdk.utils/meta.yaml
-
               # Build conda package
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
               conda build fds.sdk.utils
               
-              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main --force ${package_file}
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
