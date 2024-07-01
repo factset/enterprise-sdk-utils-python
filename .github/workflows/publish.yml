@@ -74,14 +74,14 @@ jobs:
 
               # Build conda package
               conda config --set anaconda_upload no
-              package_file=$(conda build fds.sdk.utils --output)
+              conda build fds.sdk.utils --output
 
               cd /home/runner/miniconda3/envs/conda-env/conda-bld/noarch
               ls -la
               cd /home/runner/work/enterprise-sdk-utils-python/enterprise-sdk-utils-python/fds.sdk.utils
               ls -la
               
-              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main /home/runner/miniconda3/envs/conda-env/conda-bld/noarch/fds.sdk.utils-0.9.0-py_0.tar.bz2
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
