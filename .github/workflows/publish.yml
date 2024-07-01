@@ -57,7 +57,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=0.10.0
+          version=2.0.0
           while [ $count -lt $max_retries ]; do
             # Create meta.yaml recipe for the package pulled from PyPi
             grayskull pypi fds.sdk.utils==${version}
@@ -83,7 +83,7 @@ jobs:
               package_file=$(conda build fds.sdk.utils --output)
               conda build fds.sdk.utils
               
-              anaconda -t $ANACONDA_TOKEN upload -u factset -l main --force ${package_file}
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
