@@ -77,9 +77,9 @@ jobs:
               package_file=$(conda build fds.sdk.utils --output)
 
               cd /home/runner/miniconda3/envs/conda-env/conda-bld/noarch
-              ls
-              cd /home/runner/work/enterprise-sdk-utils-python/enterprise-sdk-utils-python
-              ls
+              ls -la
+              cd /home/runner/work/enterprise-sdk-utils-python/enterprise-sdk-utils-python/fds.sdk.utils
+              ls -la
               
               anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
