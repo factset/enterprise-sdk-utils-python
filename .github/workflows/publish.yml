@@ -85,7 +85,7 @@ jobs:
               package_file=$(conda build fds.sdk.utils --output)
               conda build fds.sdk.utils
               
-              # anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
               echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
