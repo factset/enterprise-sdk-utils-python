@@ -74,9 +74,9 @@ jobs:
 
               # Modify meta.yaml to include description and dev_url
               sed -i "/about:/a \\
-                dev_url: \"https://github.com/factset/enterprise-sdk-utils-python\"\\
-                description: \"This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet APIs.\"
-                " "fds.sdk.utils/meta.yaml"
+              dev_url: \"https://github.com/factset/enterprise-sdk-utils-python\"\\
+              description: \"This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet APIs.\"
+              " "fds.sdk.utils/meta.yaml"
 
               cat fds.sdk.utils/meta.yaml
 
