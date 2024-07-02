@@ -3,7 +3,6 @@ name: Publish
 on:
   release:
     types: [published]
-  pull_request:
 
 jobs:
   deploy:
@@ -45,6 +44,10 @@ jobs:
         run: |
           poetry build
 
+      - name: Publish
+        run: |
+          poetry publish -r publish
+
       - name: Publish to Anaconda
         shell: bash -el {0}
         run: |
@@ -57,7 +60,7 @@ jobs:
           count=0
           max_retries=5
           tag=${{ github.event.release.tag_name }}
-          version=2.0.0
+          version=${tag#v}
           while [ $count -lt $max_retries ]; do
             # Create meta.yaml recipe for the package pulled from PyPi
             grayskull pypi fds.sdk.utils==${version}
