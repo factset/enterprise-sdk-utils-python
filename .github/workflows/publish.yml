@@ -81,7 +81,7 @@ jobs:
               # Build conda package
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
-              conda build fds.sdk.utils
+              conda build -c conda-forge fds.sdk.utils
               
               anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
