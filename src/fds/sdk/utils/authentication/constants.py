@@ -14,6 +14,7 @@ class CONSTS:
     # access token
     TOKEN_ACCESS_TOKEN = "access_token"
     TOKEN_EXPIRES_AT = "expires_at"
+    TOKEN_EXPIRY_OFFSET_SECS = 30
 
     # config
     CONFIG_CLIENT_ID = "clientId"
