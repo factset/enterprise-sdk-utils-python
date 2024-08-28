@@ -409,7 +409,7 @@ def test_get_access_token_cached(example_config, mocker, caplog):
     mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
     mock_oauth2_session.return_value.fetch_token.return_value = {
         "access_token": "test",
-        "expires_at": 10,
+        "expires_at": 40,
     }
     mocker.patch("fds.sdk.utils.authentication.confidential.time.time", return_value=0)
 
@@ -418,7 +418,7 @@ def test_get_access_token_cached(example_config, mocker, caplog):
     assert client.get_access_token() == client.get_access_token()
     mock_oauth2_session.return_value.fetch_token.assert_called_once()
 
-    assert "Retrieving cached token. Expires in '10' seconds" in caplog.text
+    assert "Retrieving cached token. Expires in '40' seconds" in caplog.text
 
 
 def test_get_access_token_cache_expired(client, mocker, caplog):
@@ -428,7 +428,7 @@ def test_get_access_token_cache_expired(client, mocker, caplog):
         "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
         return_value={
             "access_token": "test",
-            "expires_at": 10,
+            "expires_at": 30,
         },
     )
 
