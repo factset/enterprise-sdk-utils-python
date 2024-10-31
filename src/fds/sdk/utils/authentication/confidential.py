@@ -247,7 +247,7 @@ class ConfidentialClient(OAuth2Client):
         if not self._cached_token:
             log.debug("Access Token cache is empty")
             return False
-        if time.time() < self._cached_token[CONSTS.TOKEN_EXPIRES_AT]:
+        if time.time() < self._cached_token[CONSTS.TOKEN_EXPIRES_AT] - CONSTS.TOKEN_EXPIRY_OFFSET_SECS:
             return True
         else:
             log.debug("Cached access token has expired at %s", self._cached_token[CONSTS.TOKEN_EXPIRES_AT])

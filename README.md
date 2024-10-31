@@ -3,6 +3,7 @@
 # FactSet SDK Utilities for Python
 
 [![PyPi](https://img.shields.io/pypi/v/fds.sdk.utils)](https://pypi.org/project/fds.sdk.utils/)
+[![Anaconda-Server Badge](https://anaconda.org/factset/fds.sdk.utils/badges/version.svg)](https://anaconda.org/factset/fds.sdk.utils)
 [![Apache-2 license](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet
@@ -20,6 +21,12 @@ poetry add fds.sdk.utils
 
 ```sh
 pip install fds.sdk.utils
+```
+
+### Conda
+
+```sh
+conda install factset::fds.sdk.utils
 ```
 
 ## Usage

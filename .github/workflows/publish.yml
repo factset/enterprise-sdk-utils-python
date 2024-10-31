@@ -9,9 +9,12 @@ jobs:
     name: Deploy to package index
     runs-on: ubuntu-20.04
     env:
+      PYTHON_VERSION: 3.9
       REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
       REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      CONDA_ENV_NAME: conda-env
 
     steps:
       - name: Checkout repository
@@ -20,7 +23,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          activate-environment: ${{ env.CONDA_ENV_NAME }}
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -37,3 +47,55 @@ jobs:
       - name: Publish
         run: |
           poetry publish -r publish
+
+      - name: Publish to Anaconda
+        shell: bash -el {0}
+        run: |
+          conda install grayskull conda-build anaconda-client
+          conda info
+          conda list
+          grayskull --version
+          anaconda --version
+        
+          count=0
+          max_retries=5
+          tag=${{ github.event.release.tag_name }}
+          version=${tag#v}
+          while [ $count -lt $max_retries ]; do
+            # Create meta.yaml recipe for the package pulled from PyPi
+            grayskull pypi fds.sdk.utils==${version}
+            
+            if [ -f ./fds.sdk.utils/meta.yaml ]; then
+              echo "Version ${version} of fds.sdk.utils is available on PyPI."
+
+              # Modify the meta.yaml recipe-maintainers property to include all maintainers of this repo
+              sed -i "/recipe-maintainers:/,/extra:/ s/- .*/- gdulafactset/" fds.sdk.utils/meta.yaml
+              echo "    - mima0815" >> fds.sdk.utils/meta.yaml
+              echo "    - eschmidtfds" >> fds.sdk.utils/meta.yaml
+              echo "    - Filip1x9" >> fds.sdk.utils/meta.yaml
+              echo "    - dgawande12" >> fds.sdk.utils/meta.yaml
+
+              # Modify meta.yaml to include description and dev_url
+              sed -i "/about:/a \\
+            dev_url: \"https://github.com/factset/enterprise-sdk-utils-python\"\\
+            description: \"This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet APIs.\"
+            " "fds.sdk.utils/meta.yaml"
+
+              # Build conda package
+              conda config --set anaconda_upload no
+              package_file=$(conda build fds.sdk.utils --output)
+              conda build -c conda-forge fds.sdk.utils
+              
+              anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
+              break
+            else
+              echo "Version ${version} not found, rechecking in $((2 ** count)) seconds..."
+              sleep $((2 ** count))
+              count=$((count + 1))
+            fi
+          done
+
+          if [ $count -eq $max_retries ]; then
+            echo "Maximum retries reached, package with that version was not found, publish failed."
+            exit 1
+          fi
