@@ -99,7 +99,7 @@ class ConfidentialClient(OAuth2Client):
             `ssl_ca_cert` (str): Set this to customize the certificate file to verify the peer. If ``ssl_ca_cert`` is
             set, the ca_cert will be verified whether ``verify_ssl`` is enabled
 
-            `retry` (Retry): Set this to custommize the retry policy for the requests. If not set, the default is used.
+            `retry` (Retry): Set this to customize the retry policy for the requests. If not set, the default is used.
 
 
         Raises:
@@ -257,13 +257,13 @@ class ConfidentialClient(OAuth2Client):
         """
         Returns an access token that can be used for authentication.
 
-        If the cache contains a valid access token, it's returned. Otherwise
+        If the cache contains a valid access token, it's returned. Otherwise,
         a new access token is retrieved from FactSet's authorization server.
 
         The access token should be used immediately and not stored to avoid
         any issues with token expiry.
 
-        The access token is used in the Authorization header when when accessing
+        The access token is used in the Authorization header when accessing
         FactSet's APIs. Example: `{"Authorization": "Bearer access-token"}`
 
         Returns:

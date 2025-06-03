@@ -10,34 +10,36 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-24.04
+    env:
+      PYTHON_VERSION: "3.10"
+      UV_VERSION: "0.11.13"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
         with:
-          python-version: "3.13"
+          enable-cache: true
+          version: ${{ env.UV_VERSION }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: "Set up Python"
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # 6.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --locked --all-extras --dev
 
       - name: Lint
-        run: poetry run black --check .
+        run: uv run ruff check .
 
       - name: Build
-        run: poetry build
+        run: uv build
 
-      # the `coverage xml -i` command is needed to re-write the
-      # coverage report with relative paths
       - name: Test
-        run: |
-          poetry run pytest --cov src --cov-report xml tests
-          poetry run coverage xml -i
+        run: uv run pytest
 
   test:
     name: Test
@@ -45,28 +47,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        poetry-version: ["1.8.2"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
         with:
-          python-version: "${{ matrix.python-version }}"
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: "${{ matrix.poetry-version }}"
+          enable-cache: true
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --locked --all-extras --dev
 
       - name: Build
-        run: poetry build
+        run: uv build
 
       - name: Test
-        run: poetry run tox
+        run: uv run pytest

@@ -1,10 +1,10 @@
-from .confidential import ConfidentialClient
-from .oauth2client import OAuth2Client
+from .confidential import ConfidentialClient as ConfidentialClient
+from .oauth2client import OAuth2Client as OAuth2Client
 from .exceptions import (
-    AccessTokenError,
-    AuthServerMetadataError,
-    AuthServerMetadataContentError,
-    ConfidentialClientError,
-    ConfigurationError,
-    JWSSigningError,
+    AccessTokenError as AccessTokenError,
+    AuthServerMetadataError as AuthServerMetadataError,
+    AuthServerMetadataContentError as AuthServerMetadataContentError,
+    ConfidentialClientError as ConfidentialClientError,
+    ConfigurationError as ConfigurationError,
+    JWSSigningError as JWSSigningError,
 )
