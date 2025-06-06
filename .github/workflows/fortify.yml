@@ -1,0 +1,41 @@
+name: "FOD-SAST"
+# Please change the events according to your needs: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
+on:
+  workflow_dispatch:
+  push:
+    branches:    
+      - 'main'
+
+jobs:
+  SourceCode:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read 
+      contents: read
+      security-events: write
+      pull-requests: write
+      
+    steps:
+      - name: Check Out Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - name: Run FoD SAST Scan
+        uses: fortify/github-action@v1.6.3
+        with:
+          sast-scan: true
+        env:
+          FOD_TENANT: ${{ secrets.FOD_TENANT }}
+          FOD_CLIENT_ID: ${{ secrets.FOD_API_KEY }}
+          FOD_CLIENT_SECRET: ${{ secrets.FOD_SECRET }}
+          FOD_RELEASE: ${{ secrets.FOD_RELEASE_ID }}
+          FOD_URL: "https://ams.fortify.com/"
+          FOD_API_URL: "https://api.ams.fortify.com/"
+          FOD_SAST_SCAN_EXTRA_OPTS: --notes='Triggered by GitHub Actions (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+          PACKAGE_EXTRA_OPTS: "-bt none --exclude .git/* --exclude .github/* --exclude node_modules"
+          SC_CLIENT_VERSION: 25.2.0
