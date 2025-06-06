@@ -1,7 +1,6 @@
 name: "FOD-SAST"
 # Please change the events according to your needs: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
 on:
-  pull_request:
   workflow_dispatch:
   push:
     branches:    
