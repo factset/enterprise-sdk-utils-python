@@ -2,7 +2,7 @@ name: Publish
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 jobs:
   deploy:
@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       PYTHON_VERSION: 3.9
-      REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
-      REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      UV_VERSION: 0.7.9
+      UV_PUBLISH_TOKEN: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
       ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       CONDA_ENV_NAME: conda-env
@@ -19,6 +19,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -32,21 +37,13 @@ jobs:
           activate-environment: ${{ env.CONDA_ENV_NAME }}
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Configure Poetry
-        run: |
-          poetry config repositories.publish $REPOSITORY_URL
-          poetry config http-basic.publish $REPOSITORY_USERNAME $REPOSITORY_PASSWORD
-
       - name: Build
         run: |
-          poetry build
+          uv build
 
       - name: Publish
         run: |
-          poetry publish -r publish
+          uv publish
 
       - name: Publish to Anaconda
         shell: bash -el {0}
@@ -64,7 +61,7 @@ jobs:
           while [ $count -lt $max_retries ]; do
             # Create meta.yaml recipe for the package pulled from PyPi
             grayskull pypi fds.sdk.utils==${version}
-            
+
             if [ -f ./fds.sdk.utils/meta.yaml ]; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
 
@@ -85,7 +82,7 @@ jobs:
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
               conda build -c conda-forge fds.sdk.utils
-              
+
               anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
