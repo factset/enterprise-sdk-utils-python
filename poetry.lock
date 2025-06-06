@@ -470,14 +470,14 @@ files = [
 
 [[package]]
 name = "joserfc"
-version = "1.0.4"
+version = "1.1.0"
 description = "The ultimate Python library for JOSE RFCs, including JWS, JWE, JWK, JWA, JWT"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "joserfc-1.0.4-py3-none-any.whl", hash = "sha256:ecf3a5999f89d3a663485ab7c4f633541586d6f44e664ee760197299f39ed51b"},
-    {file = "joserfc-1.0.4.tar.gz", hash = "sha256:dc3fc216cfcfc952d4c0d4b06c759a04711af0b667e5973adc47dbb1ba784127"},
+    {file = "joserfc-1.1.0-py3-none-any.whl", hash = "sha256:9493512cfffb9bc3001e8f609fe0eb7e95b71f3d3b374ede93de94b4b6b520f5"},
+    {file = "joserfc-1.1.0.tar.gz", hash = "sha256:a8f3442b04c233f742f7acde0d0dcd926414e9542a6337096b2b4e5f435f36c1"},
 ]
 
 [package.dependencies]
@@ -850,4 +850,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.8.0"
-content-hash = "627b308ca3d0150190e0d063e03ba08d27d6c0e6515006950673eacbff9f7568"
+content-hash = "ab05b37a212fee4594099b7cef9221677777bb3ccfd605143b4c942ca065309d"
