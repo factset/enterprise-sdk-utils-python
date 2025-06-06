@@ -30,7 +30,7 @@ jobs:
         with:
           sast-scan: true
         env:
-          FOD_TENANT: 'factset'
+          FOD_TENANT: ${{ secrets.FOD_TENANT }}
           FOD_CLIENT_ID: ${{ secrets.FOD_API_KEY }}
           FOD_CLIENT_SECRET: ${{ secrets.FOD_SECRET }}
           FOD_RELEASE: ${{ secrets.FOD_RELEASE_ID }}
