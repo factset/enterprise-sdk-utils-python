@@ -1,7 +1,6 @@
 import json
 import logging
-import platform
-from unittest.mock import ANY, mock_open
+from unittest.mock import mock_open
 
 import pytest
 
@@ -13,6 +12,7 @@ from fds.sdk.utils.authentication import (
     ConfidentialClientError,
     ConfigurationError,
     OAuth2Client,
+    constants,
 )
 
 
@@ -203,7 +203,7 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
         url="https://auth.factset.com/.well-known/openid-configuration",
         proxies={"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
         verify=False,
-        headers={"User-Agent": f"fds-sdk/python/utils/2.1.1 ({platform.system()}; Python {platform.python_version()})"},
+        headers={"User-Agent": constants.CONSTS.USER_AGENT},
     )
 
 
@@ -233,7 +233,7 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
         url=auth_test,
         proxies=None,
         verify=True,
-        headers={"User-Agent": f"fds-sdk/python/utils/2.1.1 ({platform.system()}; Python {platform.python_version()})"},
+        headers={"User-Agent": constants.CONSTS.USER_AGENT},
     )
     assert client
 
@@ -378,7 +378,7 @@ def test_get_access_token_fetch(client, mocker):
         headers={
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent": f"fds-sdk/python/utils/2.1.1 ({platform.system()}; Python {platform.python_version()})",
+            "User-Agent": constants.CONSTS.USER_AGENT,
         },
     )
 
