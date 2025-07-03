@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fds.sdk.utils"
-version = "2.1.1"
+version = "2.1.2"
 description = "Utilities for interacting with FactSet APIs."
 authors = ["FactSet Research Systems"]
 license = "Apache-2.0"
