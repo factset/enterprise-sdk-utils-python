@@ -470,14 +470,14 @@ files = [
 
 [[package]]
 name = "joserfc"
-version = "1.2.0"
+version = "1.2.1"
 description = "The ultimate Python library for JOSE RFCs, including JWS, JWE, JWK, JWA, JWT"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "joserfc-1.2.0-py3-none-any.whl", hash = "sha256:0d7ecdb8dd106f385d7bfd61494ef226d61e3bb9cdb62cf62b51e73e97eeba3b"},
-    {file = "joserfc-1.2.0.tar.gz", hash = "sha256:7708fec6bfcc76a58ea393fceb26e51e0de882975ec5ee1bc7d26cc15176bcdb"},
+    {file = "joserfc-1.2.1-py3-none-any.whl", hash = "sha256:4d3e3268689573a9f563400cc15dfcd5c289dbce3bb180eb35c4d3cdede59351"},
+    {file = "joserfc-1.2.1.tar.gz", hash = "sha256:466a75dc0af9c6711d2a93f38e91c5d4920ec77059063325c251913da3e83569"},
 ]
 
 [package.dependencies]
