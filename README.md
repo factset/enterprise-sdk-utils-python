@@ -5,9 +5,12 @@
 [![PyPi](https://img.shields.io/pypi/v/fds.sdk.utils)](https://pypi.org/project/fds.sdk.utils/)
 [![Anaconda-Server Badge](https://anaconda.org/factset/fds.sdk.utils/badges/version.svg)](https://anaconda.org/factset/fds.sdk.utils)
 [![Apache-2 license](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://pypi.org/project/fds.sdk.utils/)
 
 This repository contains a collection of utilities that supports FactSet's SDK in Python and facilitate usage of FactSet
 APIs.
+
+> **Requires Python 3.10 or higher.** Python 3.8 and 3.9 are end-of-life and no longer supported as of v3.0.0.
 
 ## Installation
 
@@ -195,7 +198,7 @@ Please refer to the [contributing guide](CONTRIBUTING.md).
 
 # Copyright
 
-Copyright 2022 FactSet Research Systems Inc
+Copyright 2026 FactSet Research Systems Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
