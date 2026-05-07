@@ -9,7 +9,7 @@ jobs:
     name: Deploy to package index
     runs-on: ubuntu-24.04
     env:
-      PYTHON_VERSION: 3.9
+      PYTHON_VERSION: "3.12"
       REPOSITORY_USERNAME: ${{ secrets.PYPI_USERNAME }}
       REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           miniconda-version: "latest"
           activate-environment: ${{ env.CONDA_ENV_NAME }}
@@ -64,7 +64,7 @@ jobs:
           while [ $count -lt $max_retries ]; do
             # Create meta.yaml recipe for the package pulled from PyPi
             grayskull pypi fds.sdk.utils==${version}
-            
+
             if [ -f ./fds.sdk.utils/meta.yaml ]; then
               echo "Version ${version} of fds.sdk.utils is available on PyPI."
 
@@ -85,7 +85,7 @@ jobs:
               conda config --set anaconda_upload no
               package_file=$(conda build fds.sdk.utils --output)
               conda build -c conda-forge fds.sdk.utils
-              
+
               anaconda -t $ANACONDA_TOKEN upload -u factset -l main ${package_file}
               break
             else
