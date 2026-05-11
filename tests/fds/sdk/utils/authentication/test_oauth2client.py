@@ -1,4 +1,3 @@
-from typing import Type
 import pytest
 from fds.sdk.utils.authentication import OAuth2Client
 

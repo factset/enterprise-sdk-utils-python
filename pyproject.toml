@@ -1,39 +1,47 @@
-[tool.poetry]
+[project]
 name = "fds.sdk.utils"
 version = "3.0.0"
 description = "Utilities for interacting with FactSet APIs."
-authors = ["FactSet Research Systems"]
-license = "Apache-2.0"
+authors = [{ name = "FactSet Research Systems" }]
+requires-python = ">=3.10.0,<4"
 readme = "README.md"
-homepage = "https://developer.factset.com"
-keywords = [
-  "FactSet",
-  "API",
-  "SDK"
+license = "Apache-2.0"
+keywords = ["FactSet", "API", "SDK"]
+dependencies = [
+  "requests-oauthlib>=2.0.0,<3",
+  "requests>=2.33.0,<3",
+  "oauthlib>=3.2.2,<4",
+  "joserfc>=1.6.3,<2.0",
 ]
-packages = [
-  { include = "fds", from = "src" }
+
+[project.urls]
+Homepage = "https://developer.factset.com"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.0.3,<10",
+  "pytest-cov>=7.1.0,<8",
+  "pytest-mock>=3.15.1,<4",
+  "ruff>=0.15.12",
 ]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/fds"]
 exclude = ["tests"]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-requests-oauthlib = "^2.0.0"
-requests = "^2.33.0"
-oauthlib = "^3.2.2"
-joserfc = ">=1.6.3,<2.0"
+[tool.hatch.build.targets.wheel]
+include = ["src/fds"]
+exclude = ["tests"]
 
-[tool.poetry.dev-dependencies]
-pytest = "^9.0.3"
-black = "^26.3.1"
-pytest-cov = "^7.1.0"
-pytest-mock = "^3.15.1"
-tox = "^4.53.1"
-tox-gh-actions = "^3.5.0"
+[tool.hatch.build.targets.wheel.sources]
+"src/fds" = "fds"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 120
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+addopts = "--cov=fds --cov-report xml"
