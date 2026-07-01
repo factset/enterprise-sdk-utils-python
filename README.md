@@ -120,6 +120,22 @@ client = ConfidentialClient(
 )
 ```
 
+### OAuth 2.0 Scopes
+
+By default no scope is requested and the authorization server determines the granted scopes based on the client's
+identity. If you need to request one or more specific
+[OAuth 2.0 scopes](https://github.com/factset/oauth2-guidelines#client-credentials-flow-1), pass them as a list to the
+`scope` parameter.
+
+```python
+from fds.sdk.utils.authentication import ConfidentialClient
+
+client = ConfidentialClient(
+  config_path='/path/to/config.json',
+  scope=["factset.api.read"]
+)
+```
+
 ## Modules
 
 Information about the various utility modules contained in this library can be found below.
