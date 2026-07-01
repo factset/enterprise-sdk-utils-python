@@ -45,6 +45,7 @@ class ConfidentialClient(OAuth2Client):
         verify_ssl: bool = True,
         ssl_ca_cert: str = None,
         retry: Retry = None,
+        scope: list = None,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -101,6 +102,10 @@ class ConfidentialClient(OAuth2Client):
 
             `retry` (Retry): Set this to custommize the retry policy for the requests. If not set, the default is used.
 
+            `scope` (list): Set this to request one or more OAuth 2.0 scopes when fetching an access token, for
+            example ``["factset.api.read"]``. If not set, no scope is sent and the authorization server determines
+            the granted scopes based on the client's identity.
+
 
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
@@ -136,6 +141,7 @@ class ConfidentialClient(OAuth2Client):
         self._verify_ssl = verify_ssl
         self._proxy_headers = proxy_headers
         self._ssl_ca_cert = ssl_ca_cert
+        self._scope = scope
 
         if retry is not None:
             self._retry = retry
@@ -296,15 +302,20 @@ class ConfidentialClient(OAuth2Client):
             if self._ssl_ca_cert:
                 verify = self._ssl_ca_cert
 
-            token = self._oauth_session.fetch_token(
-                token_url=self._well_known_uri_metadata[CONSTS.META_TOKEN_ENDPOINT],
-                client_id=self._config[CONSTS.CONFIG_CLIENT_ID],
-                client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                client_assertion=self._get_client_assertion_jws(),
-                verify=verify,
-                proxies=self._proxy,
-                headers=headers,
-            )
+            token_kwargs = {
+                "token_url": self._well_known_uri_metadata[CONSTS.META_TOKEN_ENDPOINT],
+                "client_id": self._config[CONSTS.CONFIG_CLIENT_ID],
+                "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                "client_assertion": self._get_client_assertion_jws(),
+                "verify": verify,
+                "proxies": self._proxy,
+                "headers": headers,
+            }
+
+            if self._scope is not None:
+                token_kwargs["scope"] = self._scope
+
+            token = self._oauth_session.fetch_token(**token_kwargs)
             self._cached_token = token
             log.info("Caching token that expires at %s", token[CONSTS.TOKEN_EXPIRES_AT])
             return token[CONSTS.TOKEN_ACCESS_TOKEN]
