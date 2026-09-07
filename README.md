@@ -49,14 +49,11 @@ from fds.sdk.utils.authentication import ConfidentialClient
 import requests
 
 # The ConfidentialClient instance should be reused in production environments.
-client = ConfidentialClient(
-  config_path='/path/to/config.json'
-)
+client = ConfidentialClient(config_path="/path/to/config.json")
 res = requests.get(
-  'https://api.factset.com/analytics/lookups/v3/currencies',
-  headers={
-    'Authorization': 'Bearer ' + client.get_access_token()
-  })
+    "https://api.factset.com/analytics/lookups/v3/currencies",
+    headers={"Authorization": "Bearer " + client.get_access_token()},
+)
 
 print(res.text)
 ```
@@ -72,11 +69,9 @@ If necessary it is possible to set custom `proxy_headers` as dictionary.
 from fds.sdk.utils.authentication import ConfidentialClient
 
 client = ConfidentialClient(
-  config_path='/path/to/config.json',
-  proxy="http://secret:password@localhost:5050",
-  proxy_headers={
-    "Custom-Proxy-Header": "Custom-Proxy-Header-Value"
-  }
+    config_path="/path/to/config.json",
+    proxy="http://secret:password@localhost:5050",
+    proxy_headers={"Custom-Proxy-Header": "Custom-Proxy-Header-Value"},
 )
 ```
 
@@ -95,9 +90,7 @@ local development or testing
 from fds.sdk.utils.authentication import ConfidentialClient
 
 client = ConfidentialClient(
-  config_path='/path/to/config.json',
-  verify_ssl=True,
-  ssl_ca_cert='/path/to/ca.pem'
+    config_path="/path/to/config.json", verify_ssl=True, ssl_ca_cert="/path/to/ca.pem"
 )
 ```
 
@@ -111,12 +104,8 @@ from urllib3 import Retry
 from fds.sdk.utils.authentication import ConfidentialClient
 
 client = ConfidentialClient(
-  config_path='/path/to/config.json',
-  retry=Retry(
-    total=5,
-    backoff_factor=0.1,
-    status_forcelist=[500, 502, 503, 504]
-  )
+    config_path="/path/to/config.json",
+    retry=Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]),
 )
 ```
 
@@ -183,13 +172,13 @@ help you understand what it's doing. You can increase the log level to see addit
 conventions. For example:
 
 ```python
-logging.getLogger('fds.sdk.utils').setLevel(logging.DEBUG)
+logging.getLogger("fds.sdk.utils").setLevel(logging.DEBUG)
 ```
 
 or
 
 ```python
-logging.getLogger('fds.sdk.utils.authentication').setLevel(logging.DEBUG)
+logging.getLogger("fds.sdk.utils.authentication").setLevel(logging.DEBUG)
 ```
 
 # Contributing

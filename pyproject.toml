@@ -7,11 +7,12 @@ requires-python = ">=3.10.0,<4"
 readme = "README.md"
 license = "Apache-2.0"
 keywords = ["FactSet", "API", "SDK"]
+
 dependencies = [
   "requests-oauthlib>=2.0.0,<3",
-  "requests>=2.33.0,<3",
+  "requests>=2.34.2,<3",
   "oauthlib>=3.2.2,<4",
-  "joserfc>=1.6.3,<2.0",
+  "joserfc>=1.7.5,<2.0",
 ]
 
 [project.urls]
@@ -19,11 +20,23 @@ Homepage = "https://developer.factset.com"
 
 [dependency-groups]
 dev = [
-  "pytest>=9.0.3,<10",
+  "pytest>=9.1.1,<10",
   "pytest-cov>=7.1.0,<8",
   "pytest-mock>=3.15.1,<4",
-  "ruff>=0.15.12",
+  "ruff>=0.16.6",
+  "pyright>=1.1.411",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--cov=fds --cov-report xml"
+
+[tool.pyright]
+include = ["src","tests"]
+
+[tool.uv]
+required-version = ">=0.12.5"
 
 [tool.hatch.build.targets.sdist]
 include = ["src/fds"]
@@ -39,9 +52,3 @@ exclude = ["tests"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.black]
-line-length = 120
-
-[tool.pytest.ini_options]
-addopts = "--cov=fds --cov-report xml"

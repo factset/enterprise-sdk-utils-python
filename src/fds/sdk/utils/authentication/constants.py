@@ -1,4 +1,5 @@
 import platform
+from typing import ClassVar
 
 
 class CONSTS:
@@ -23,12 +24,22 @@ class CONSTS:
     CONFIG_CLIENT_ID = "clientId"
     CONFIG_WELL_KNOWN_URI = "wellKnownUri"
     CONFIG_JWK = "jwk"
-    CONFIG_JWK_REQUIRED_KEYS = ["kty", "alg", "use", "kid", "n", "e", "d", "p", "q", "dp", "dq", "qi"]
+    CONFIG_JWK_REQUIRED_KEYS: ClassVar[list[str]] = [
+        "kty",
+        "alg",
+        "use",
+        "kid",
+        "n",
+        "e",
+        "d",
+        "p",
+        "q",
+        "dp",
+        "dq",
+        "qi",
+    ]
 
     # default values
     FACTSET_WELL_KNOWN_URI = "https://auth.factset.com/.well-known/openid-configuration"
 
     USER_AGENT = f"fds-sdk/python/utils/3.0.1 ({platform.system()}; Python {platform.python_version()})"
-
-
-CONSTS = CONSTS()

@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       PYTHON_VERSION: "3.10"
-      UV_VERSION: "0.11.13"
       UV_PUBLISH_TOKEN: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
       ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
@@ -24,7 +23,6 @@ jobs:
         uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
         with:
           enable-cache: true
-          version: ${{ env.UV_VERSION }}
 
       - name: Setup Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # 6.1.0

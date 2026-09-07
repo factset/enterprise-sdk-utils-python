@@ -1,13 +1,14 @@
 import json
 import logging
+from typing import ClassVar
 from unittest.mock import mock_open
 
 import pytest
 
 from fds.sdk.utils.authentication import (
     AccessTokenError,
-    AuthServerMetadataError,
     AuthServerMetadataContentError,
+    AuthServerMetadataError,
     ConfidentialClient,
     ConfidentialClientError,
     ConfigurationError,
@@ -73,7 +74,7 @@ def test_constructor_with_config(mocker, example_config, caplog):
 
     class AuthServerMetadataRes:
         status_code = 200
-        headers = {"header": "value"}
+        headers: ClassVar = {"header": "value"}
 
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
@@ -102,7 +103,7 @@ def test_constructor_with_file(mocker, example_config, caplog):
 
     class AuthServerMetadataRes:
         status_code = 200
-        headers = {"header": "value"}
+        headers: ClassVar = {"header": "value"}
 
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
@@ -113,7 +114,8 @@ def test_constructor_with_file(mocker, example_config, caplog):
     fake_file_path = "/my/fake/path/creds.json"
 
     mocked_open = mocker.patch(
-        "fds.sdk.utils.authentication.confidential.open", mock_open(read_data=json.dumps(example_config))
+        "fds.sdk.utils.authentication.confidential.open",
+        mock_open(read_data=json.dumps(example_config)),
     )
     client = ConfidentialClient(fake_file_path)
 
@@ -127,7 +129,7 @@ def test_constructor_with_file(mocker, example_config, caplog):
     assert "and token_endpoint" in caplog.text
 
 
-def test_constructor_bad_params():
+def test_constructor_bad_params(example_config):
     with pytest.raises(ValueError):
         ConfidentialClient()
 
@@ -148,7 +150,10 @@ def test_constructor_with_bad_file():
 
 def test_constructor_bad_session_instantiation(mocker, example_config):
     mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
-    mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session", side_effect=Exception("fail!"))
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session",
+        side_effect=Exception("fail!"),
+    )
 
     with pytest.raises(ConfidentialClientError):
         ConfidentialClient(config=example_config)
@@ -159,10 +164,13 @@ def test_constructor_session_instantiation(mocker, example_config):
     backend_result = "good_mock_backend"
     example_config["clientId"] = test_client_id
     mock_oauth_backend = mocker.patch(
-        "fds.sdk.utils.authentication.confidential.BackendApplicationClient", return_value=backend_result
+        "fds.sdk.utils.authentication.confidential.BackendApplicationClient",
+        return_value=backend_result,
     )
 
-    mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
+    mock_oauth2_session = mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session"
+    )
 
     ConfidentialClient(config=example_config)
 
@@ -170,15 +178,20 @@ def test_constructor_session_instantiation(mocker, example_config):
     mock_oauth2_session.assert_called_with(client=backend_result)
 
 
-def test_constructor_session_instantiation_with_additional_parameters(mocker, example_config):
+def test_constructor_session_instantiation_with_additional_parameters(
+    mocker, example_config
+):
     test_client_id = "good_test"
     backend_result = "good_mock_backend"
     example_config["clientId"] = test_client_id
     mock_oauth_backend = mocker.patch(
-        "fds.sdk.utils.authentication.confidential.BackendApplicationClient", return_value=backend_result
+        "fds.sdk.utils.authentication.confidential.BackendApplicationClient",
+        return_value=backend_result,
     )
 
-    mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
+    mock_oauth2_session = mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session"
+    )
 
     additional_parameters = {
         "proxy": "http://my:pass@test.test.test",
@@ -188,12 +201,14 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
 
     class AuthServerMetadataRes:
         status_code = 200
-        headers = {"header": "value"}
+        headers: ClassVar = {"header": "value"}
 
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
-    get_mock = mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
+    get_mock = mocker.patch(
+        "requests.Session.get", return_value=AuthServerMetadataRes()
+    )
 
     ConfidentialClient(config=example_config, **additional_parameters)
 
@@ -201,7 +216,10 @@ def test_constructor_session_instantiation_with_additional_parameters(mocker, ex
     mock_oauth2_session.assert_called_with(client=backend_result)
     get_mock.assert_called_with(
         url="https://auth.factset.com/.well-known/openid-configuration",
-        proxies={"http": "http://my:pass@test.test.test", "https": "http://my:pass@test.test.test"},
+        proxies={
+            "http": "http://my:pass@test.test.test",
+            "https": "http://my:pass@test.test.test",
+        },
         verify=False,
         headers={"User-Agent": constants.CONSTS.USER_AGENT},
     )
@@ -217,12 +235,14 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
 
     class AuthServerMetadataRes:
         status_code = 200
-        headers = {"header": "value"}
+        headers: ClassVar = {"header": "value"}
 
         def json(self):
             return {"issuer": "test", "token_endpoint": "http://test.test"}
 
-    get_mock = mocker.patch("requests.Session.get", return_value=AuthServerMetadataRes())
+    get_mock = mocker.patch(
+        "requests.Session.get", return_value=AuthServerMetadataRes()
+    )
     auth_test = "https://auth.test"
 
     example_config["wellKnownUri"] = auth_test
@@ -237,7 +257,10 @@ def test_constructor_custom_well_known_uri(mocker, example_config, caplog):
     )
     assert client
 
-    assert "Attempting metadata retrieval from well_known_uri: https://auth.test" in caplog.text
+    assert (
+        "Attempting metadata retrieval from well_known_uri: https://auth.test"
+        in caplog.text
+    )
 
 
 def test_constructor_metadata_error(mocker, example_config):
@@ -260,7 +283,7 @@ def test_constructor_missing_metadata(mocker, example_config):
 
     class AuthServerMetadataRes:
         status_code = 200
-        headers = {"header": "value"}
+        headers: ClassVar = {"header": "value"}
 
         @staticmethod
         def json():
@@ -307,12 +330,16 @@ def test_get_access_token(client, mocker, caplog):
 
 def test_get_access_token_jws_sign(client, example_config, mocker):
     mocker.patch("fds.sdk.utils.authentication.confidential.time.time", return_value=0)
-    mocker.patch("fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000)
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000
+    )
     mocker.patch(
         "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_EXPIRE_AFTER_SECS",
         2000,
     )
-    mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid"
+    )
     mock_jws_sign = mocker.patch("joserfc.jwt.encode", return_value="jws")
 
     client.get_access_token()
@@ -334,12 +361,16 @@ def test_get_access_token_jws_sign(client, example_config, mocker):
 
 def test_get_access_token_jws_sign_error(client, mocker, caplog):
     mocker.patch("fds.sdk.utils.authentication.confidential.time.time", return_value=0)
-    mocker.patch("fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000)
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000
+    )
     mocker.patch(
         "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_EXPIRE_AFTER_SECS",
         2000,
     )
-    mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid"
+    )
 
     mocker.patch(
         "joserfc.jwt.encode",
@@ -357,12 +388,16 @@ def test_get_access_token_fetch(client, mocker):
         return_value={"access_token": "test", "expires_at": 10},
     )
     mocker.patch("fds.sdk.utils.authentication.confidential.time.time", return_value=0)
-    mocker.patch("fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000)
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000
+    )
     mocker.patch(
         "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_EXPIRE_AFTER_SECS",
         2000,
     )
-    mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid"
+    )
     mocker.patch("joserfc.jwt.encode", return_value="jws")
     mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
 
@@ -386,14 +421,21 @@ def test_get_access_token_fetch(client, mocker):
 def test_get_access_token_fetch_error(client, mocker, caplog):
     caplog.set_level(logging.DEBUG)
     mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
-    mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token", side_effect=Exception("fail!"))
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
+        side_effect=Exception("fail!"),
+    )
     mocker.patch("fds.sdk.utils.authentication.confidential.time.time", return_value=0)
-    mocker.patch("fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000)
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_NOT_BEFORE_SECS", 1000
+    )
     mocker.patch(
         "fds.sdk.utils.authentication.confidential.CONSTS.CC_JWT_EXPIRE_AFTER_SECS",
         2000,
     )
-    mocker.patch("fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid")
+    mocker.patch(
+        "fds.sdk.utils.authentication.confidential.uuid.uuid4", return_value="uuid"
+    )
     mocker.patch("joserfc.jwt.encode", return_value="jws")
     mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
 
@@ -413,7 +455,9 @@ def test_get_access_token_cached(example_config, mocker, caplog):
     mocker.patch("joserfc.jwt.encode", return_value="jws")
     mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
     mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
-    mock_oauth2_session = mocker.patch("fds.sdk.utils.authentication.confidential.OAuth2Session")
+    mock_oauth2_session = mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session"
+    )
     mock_oauth2_session.return_value.fetch_token.return_value = {
         "access_token": "test",
         "expires_at": 40,

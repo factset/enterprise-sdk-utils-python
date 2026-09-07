@@ -12,15 +12,15 @@ from requests_oauthlib import OAuth2Session
 from urllib3 import Retry
 
 from .constants import CONSTS
-from .oauth2client import OAuth2Client
 from .exceptions import (
     AccessTokenError,
+    AuthServerMetadataContentError,
+    AuthServerMetadataError,
     ConfidentialClientError,
     ConfigurationError,
     JWSSigningError,
-    AuthServerMetadataError,
-    AuthServerMetadataContentError,
 )
+from .oauth2client import OAuth2Client
 
 # Set up logger
 log = logging.getLogger(__name__)
@@ -38,13 +38,13 @@ class ConfidentialClient(OAuth2Client):
 
     def __init__(
         self,
-        config_path: str = None,
-        config: dict = None,
-        proxy: str = None,
-        proxy_headers: dict = None,
+        config_path: str | None = None,
+        config: dict | None = None,
+        proxy: str | None = None,
+        proxy_headers: dict | None = None,
         verify_ssl: bool = True,
-        ssl_ca_cert: str = None,
-        retry: Retry = None,
+        ssl_ca_cert: str | None = None,
+        retry: Retry | None = None,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -123,7 +123,9 @@ class ConfidentialClient(OAuth2Client):
                     self._config = json.load(config_file)
                     log.debug("Retrieved configuration from file: %s", config_path)
             except Exception as e:
-                raise ConfigurationError(f"Error retrieving contents of {config_path}") from e
+                raise ConfigurationError(
+                    f"Error retrieving contents of {config_path}"
+                ) from e
 
         if config:
             self._config = config
@@ -144,12 +146,22 @@ class ConfidentialClient(OAuth2Client):
                 total=3,
                 backoff_factor=1,
                 status_forcelist=[413, 429, 500, 502, 503, 504],
-                allowed_methods={"DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT", "TRACE"},
+                allowed_methods={
+                    "DELETE",
+                    "GET",
+                    "HEAD",
+                    "OPTIONS",
+                    "POST",
+                    "PUT",
+                    "TRACE",
+                },
             )
 
         try:
             self._oauth_session = OAuth2Session(
-                client=BackendApplicationClient(client_id=self._config[CONSTS.CONFIG_CLIENT_ID])
+                client=BackendApplicationClient(
+                    client_id=self._config[CONSTS.CONFIG_CLIENT_ID]
+                )
             )
             self._oauth_session.mount("https://", HTTPAdapter(max_retries=self._retry))
         except Exception as e:
@@ -159,13 +171,21 @@ class ConfidentialClient(OAuth2Client):
 
         log.debug("Reviewing credentials format and completeness")
 
-        self._config.setdefault(CONSTS.CONFIG_WELL_KNOWN_URI, CONSTS.FACTSET_WELL_KNOWN_URI)
+        self._config.setdefault(
+            CONSTS.CONFIG_WELL_KNOWN_URI, CONSTS.FACTSET_WELL_KNOWN_URI
+        )
 
         if CONSTS.CONFIG_JWK not in self._config:
-            raise KeyError(f"'{CONSTS.CONFIG_JWK}' must be contained within configuration")
+            raise KeyError(
+                f"'{CONSTS.CONFIG_JWK}' must be contained within configuration"
+            )
 
-        if not set(CONSTS.CONFIG_JWK_REQUIRED_KEYS).issubset(set(self._config[CONSTS.CONFIG_JWK].keys())):
-            raise KeyError(f"JWK must contain the following items: '{CONSTS.CONFIG_JWK_REQUIRED_KEYS}'")
+        if not set(CONSTS.CONFIG_JWK_REQUIRED_KEYS).issubset(
+            set(self._config[CONSTS.CONFIG_JWK].keys())
+        ):
+            raise KeyError(
+                f"JWK must contain the following items: '{CONSTS.CONFIG_JWK_REQUIRED_KEYS}'"
+            )
 
         log.debug("Credentials are complete and formatted correctly")
 
@@ -179,7 +199,8 @@ class ConfidentialClient(OAuth2Client):
     def _init_auth_server_metadata(self) -> None:
         try:
             log.debug(
-                "Attempting metadata retrieval from well_known_uri: %s", self._config[CONSTS.CONFIG_WELL_KNOWN_URI]
+                "Attempting metadata retrieval from well_known_uri: %s",
+                self._config[CONSTS.CONFIG_WELL_KNOWN_URI],
             )
 
             verify = self._verify_ssl
@@ -198,7 +219,9 @@ class ConfidentialClient(OAuth2Client):
                 verify=verify,
                 headers=headers,
             )
-            log.debug("Request from well_known_uri completed with status: %s", res.status_code)
+            log.debug(
+                "Request from well_known_uri completed with status: %s", res.status_code
+            )
             log.debug("Response headers from well_known_uri were %s", res.headers)
             self._well_known_uri_metadata = res.json()
         except Exception as e:
@@ -247,10 +270,17 @@ class ConfidentialClient(OAuth2Client):
         if not self._cached_token:
             log.debug("Access Token cache is empty")
             return False
-        if time.time() < self._cached_token[CONSTS.TOKEN_EXPIRES_AT] - CONSTS.TOKEN_EXPIRY_OFFSET_SECS:
+        if (
+            time.time()
+            < self._cached_token[CONSTS.TOKEN_EXPIRES_AT]
+            - CONSTS.TOKEN_EXPIRY_OFFSET_SECS
+        ):
             return True
         else:
-            log.debug("Cached access token has expired at %s", self._cached_token[CONSTS.TOKEN_EXPIRES_AT])
+            log.debug(
+                "Cached access token has expired at %s",
+                self._cached_token[CONSTS.TOKEN_EXPIRES_AT],
+            )
             return False
 
     def get_access_token(self) -> str:
@@ -301,7 +331,9 @@ class ConfidentialClient(OAuth2Client):
                 client_id=self._config[CONSTS.CONFIG_CLIENT_ID],
                 client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 client_assertion=self._get_client_assertion_jws(),
-                verify=verify,
+                # requests_oauthlib's stub only declares `verify: bool | None`, but requests
+                # accepts a str CA bundle path too, which is how `ssl_ca_cert` is applied here.
+                verify=verify,  # pyright: ignore[reportArgumentType]
                 proxies=self._proxy,
                 headers=headers,
             )
