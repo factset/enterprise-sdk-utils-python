@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     name: Deploy to package index
@@ -12,8 +15,6 @@ jobs:
       PYTHON_VERSION: "3.10"
       UV_PUBLISH_TOKEN: ${{ secrets.PYPI_PASSWORD }}
       REPOSITORY_URL: ${{ secrets.PYPI_PUBLISH_URL }}
-      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-      CONDA_ENV_NAME: conda-env
 
     steps:
       - name: Checkout repository
@@ -29,13 +30,6 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v4
-        with:
-          miniconda-version: "latest"
-          activate-environment: ${{ env.CONDA_ENV_NAME }}
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Build
         run: |
           uv build
@@ -43,6 +37,27 @@ jobs:
       - name: Publish
         run: |
           uv publish
+
+  publish-conda:
+    name: Publish to Anaconda
+    needs: deploy
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-24.04
+    env:
+      PYTHON_VERSION: "3.10"
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      CONDA_ENV_NAME: conda-env
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          miniconda-version: "latest"
+          activate-environment: ${{ env.CONDA_ENV_NAME }}
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Publish to Anaconda
         shell: bash -el {0}
