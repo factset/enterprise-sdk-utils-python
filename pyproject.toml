@@ -1,39 +1,47 @@
-[tool.poetry]
+[project]
 name = "fds.sdk.utils"
 version = "3.0.1"
 description = "Utilities for interacting with FactSet APIs."
-authors = ["FactSet Research Systems"]
-license = "Apache-2.0"
+authors = [{ name = "FactSet Research Systems" }]
+requires-python = ">=3.10.0,<4"
 readme = "README.md"
-homepage = "https://developer.factset.com"
-keywords = [
-  "FactSet",
-  "API",
-  "SDK"
+license = "Apache-2.0"
+keywords = ["FactSet", "API", "SDK"]
+
+dependencies = [
+  "requests-oauthlib>=2.0.0,<3",
+  "requests>=2.34.2,<3",
+  "oauthlib>=3.2.2,<4",
+  "joserfc>=1.7.5,<2.0",
 ]
-packages = [
-  { include = "fds", from = "src" }
+
+[project.urls]
+Homepage = "https://developer.factset.com"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.1.1,<10",
+  "pytest-cov>=7.1.0,<8",
+  "pytest-mock>=3.15.1,<4",
+  "ruff>=0.16.6",
+  "pyright>=1.1.411",
 ]
-exclude = ["tests"]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-requests-oauthlib = "^2.0.0"
-requests = "^2.33.0"
-oauthlib = "^3.2.2"
-joserfc = ">=1.6.3,<2.0"
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--cov=fds --cov-report xml"
 
-[tool.poetry.dev-dependencies]
-pytest = "^9.0.3"
-black = "^26.3.1"
-pytest-cov = "^7.1.0"
-pytest-mock = "^3.15.1"
-tox = "^4.53.1"
-tox-gh-actions = "^3.5.0"
+[tool.pyright]
+include = ["src","tests"]
 
-[tool.black]
-line-length = 120
+[tool.uv]
+required-version = ">=0.12.5"
+
+[tool.uv.build-backend]
+module-name = "fds.sdk.utils"
+namespace = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"

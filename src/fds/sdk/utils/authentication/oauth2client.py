@@ -13,4 +13,3 @@ class OAuth2Client(ABC):
         Returns:
             str: access token for protected resource requests
         """
-        pass

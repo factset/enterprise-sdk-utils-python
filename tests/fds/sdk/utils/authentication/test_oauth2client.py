@@ -1,11 +1,11 @@
-from typing import Type
 import pytest
+
 from fds.sdk.utils.authentication import OAuth2Client
 
 
 def test_cannot_instantiate():
     with pytest.raises(TypeError):
-        OAuth2Client()
+        OAuth2Client()  # pyright: ignore[reportAbstractUsage]
 
 
 def test_bad_instantiation():
@@ -13,7 +13,7 @@ def test_bad_instantiation():
         pass
 
     with pytest.raises(TypeError):
-        bad_class()
+        bad_class()  # pyright: ignore[reportAbstractUsage]
 
 
 def test_good_instantiation():
