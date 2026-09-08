@@ -415,6 +415,44 @@ def test_get_access_token_fetch(client, mocker):
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
             "User-Agent": constants.CONSTS.USER_AGENT,
         },
+        scope=None,
+    )
+
+
+def test_get_access_token_fetch_with_scope(mocker, example_config):
+    mocker.patch("fds.sdk.utils.authentication.confidential.BackendApplicationClient")
+    mock_fetch_token = mocker.patch(
+        "fds.sdk.utils.authentication.confidential.OAuth2Session.fetch_token",
+        return_value={"access_token": "test", "expires_at": 10},
+    )
+
+    mock_get = mocker.patch("requests.Session.get")
+    mock_get.return_value.json.return_value = {
+        "issuer": "test-issuer",
+        "token_endpoint": "https://test.token.endpoint",
+    }
+
+    mocker.patch("joserfc.jwt.encode", return_value="jws")
+    mocker.patch("joserfc.jwk.RSAKey.import_key", return_value="jwk")
+
+    scope = ["factset.api.read", "factset.api.write"]
+    client = ConfidentialClient(config=example_config, scope=scope)
+
+    client.get_access_token()
+
+    mock_fetch_token.assert_called_once_with(
+        token_url="https://test.token.endpoint",
+        client_id="test-clientid",
+        client_assertion_type="urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        client_assertion="jws",
+        proxies=None,
+        verify=True,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent": constants.CONSTS.USER_AGENT,
+        },
+        scope=scope,
     )
 
 

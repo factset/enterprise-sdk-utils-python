@@ -45,6 +45,7 @@ class ConfidentialClient(OAuth2Client):
         verify_ssl: bool = True,
         ssl_ca_cert: str | None = None,
         retry: Retry | None = None,
+        scope: list | None = None,
     ) -> None:
         """
         Creates a new ConfidentialClient.
@@ -101,6 +102,9 @@ class ConfidentialClient(OAuth2Client):
 
             `retry` (Retry): Set this to customize the retry policy for the requests. If not set, the default is used.
 
+            `scope` (list): Set this to request one or more OAuth 2.0 scopes when fetching an access token, for
+            example ``["factset.api.read"]``. If not set, no scope is sent and the authorization server determines
+            the granted scopes based on the client's identity.
 
         Raises:
             AuthServerMetadataError: Raised if there's an issue retrieving the authorization server metadata
@@ -138,6 +142,7 @@ class ConfidentialClient(OAuth2Client):
         self._verify_ssl = verify_ssl
         self._proxy_headers = proxy_headers
         self._ssl_ca_cert = ssl_ca_cert
+        self._scope = scope
 
         if retry is not None:
             self._retry = retry
@@ -336,6 +341,7 @@ class ConfidentialClient(OAuth2Client):
                 verify=verify,  # pyright: ignore[reportArgumentType]
                 proxies=self._proxy,
                 headers=headers,
+                scope=self._scope,
             )
             self._cached_token = token
             log.info("Caching token that expires at %s", token[CONSTS.TOKEN_EXPIRES_AT])
