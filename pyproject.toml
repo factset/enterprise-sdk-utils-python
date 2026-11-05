@@ -11,7 +11,7 @@ keywords = ["FactSet", "API", "SDK"]
 dependencies = [
   "requests-oauthlib>=2.0.0,<3",
   "requests>=2.34.2,<3",
-  "oauthlib>=3.2.2,<4",
+  "oauthlib>=3.2.2,<5",
   "joserfc>=1.7.5,<2.0",
 ]
 
