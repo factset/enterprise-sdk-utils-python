@@ -42,4 +42,4 @@ class CONSTS:
     # default values
     FACTSET_WELL_KNOWN_URI = "https://auth.factset.com/.well-known/openid-configuration"
 
-    USER_AGENT = f"fds-sdk/python/utils/3.0.2 ({platform.system()}; Python {platform.python_version()})"
+    USER_AGENT = f"fds-sdk/python/utils/3.1.0 ({platform.system()}; Python {platform.python_version()})"
